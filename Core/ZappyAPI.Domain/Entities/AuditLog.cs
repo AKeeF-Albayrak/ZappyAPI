@@ -11,7 +11,7 @@ namespace ZappyAPI.Domain.Entities
     public class AuditLog : BaseEntity
     {
         public required Guid UserId { get; set; }
-        public required AuditAction Action { get; set; } //Maybe ENUM
+        public required AuditAction Action { get; set; }
         public required string TargetId { get; set; }
         public required AuditLog_TargetType TargetType { get; set; }
 

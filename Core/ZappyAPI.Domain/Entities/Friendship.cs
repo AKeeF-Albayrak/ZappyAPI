@@ -10,9 +10,9 @@ namespace ZappyAPI.Domain.Entities
 {
     public class Friendship : BaseEntity
     {
-        public Guid UserId_1 { get; set; }
-        public Guid UserId_2 { get; set; }
-        public FriendshipStatus Status { get; set; }
+        public required Guid UserId_1 { get; set; }
+        public required Guid UserId_2 { get; set; }
+        public required FriendshipStatus Status { get; set; }
 
         public User User_1 { get; set; }
         public User User_2 { get; set; }
