@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZappyAPI.Application.Repositories;
 using ZappyAPI.Persistence.Contexts;
+using ZappyAPI.Persistence.Repositories;
 
 namespace ZappyAPI.Persistence
 {
@@ -23,6 +25,52 @@ namespace ZappyAPI.Persistence
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")),
                 ServiceLifetime.Scoped
             );
+
+
+            //Repositories
+
+            services.AddScoped<IAuditLogReadRepository, AuditLogReadRepository>();
+            services.AddScoped<IAuditLogWriteRepository, AuditLogWriteRepository>();
+
+            services.AddScoped<IFriendshipReadRepository, FriendshipReadRepository>();
+            services.AddScoped<IFriendshipWriteRepository, FriendshipWriteRepository>();
+
+            services.AddScoped<IGroupReadRepository, GroupReadRepository>();
+            services.AddScoped<IGroupWriteRepository, GroupWriteRepository>();
+
+            services.AddScoped<IGroupInviteReadRepository, GroupInviteReadRepository>();
+            services.AddScoped<IGroupInviteWriteRepository, GroupInviteWriteRepository>();
+
+            services.AddScoped<ILoginHistoryReadRepository, LoginHistoryReadRepository>();
+            services.AddScoped<ILoginHistoryWriteRepository, LoginHistoryWriteRepository>();
+
+            services.AddScoped<IMessageReadRepository, MessageReadRepository>();
+            services.AddScoped<IMessageWriteRepository, MessageWriteRepository>();
+
+            services.AddScoped<IMessageReadReadRepository, MessageReadReadRepository>();
+            services.AddScoped<IMessageReadWriteRepository, MessageReadWriteRepository>();
+
+            services.AddScoped<INotificationReadRepository, NotificationReadRepository>();
+            services.AddScoped<INotificationWriteRepository, NotificationWriteRepository>();
+
+            services.AddScoped<IParticipantReadRepository, ParticipantReadRepository>();
+            services.AddScoped<IParticipantWriteRepository, ParticipantWriteRepository>();
+
+            services.AddScoped<IRefreshTokenReadRepository, RefreshTokenReadRepository>();
+            services.AddScoped<IRefreshTokenWriteRepository, RefreshTokenWriteRepository>();
+
+            services.AddScoped<IReportReadRepository, ReportReadRepository>();
+            services.AddScoped<IReportWriteRepository, ReportWriteRepository>();
+
+            services.AddScoped<ISessionReadRepository, SessionReadRepository>();
+            services.AddScoped<ISessionWriteRepository, SessionWriteRepository>();
+
+            services.AddScoped<IUserReadRepository, UserReadRepository>();
+            services.AddScoped<IUserWriteRepository, UserWriteRepository>();
+
+            services.AddScoped<IUserStatusReadRepository, UserStatusReadRepository>();
+            services.AddScoped<IUserStatusWriteRepository, UserStatusWriteRepository>();
+
         }
     }
 }

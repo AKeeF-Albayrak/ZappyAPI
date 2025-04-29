@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Core\ZappyAPI.Application\ZappyAPI.Application.csproj" />
     <ProjectReference Include="..\..\Core\ZappyAPI.Domain\ZappyAPI.Domain.csproj" />
   </ItemGroup>
 
