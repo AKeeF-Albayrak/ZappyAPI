@@ -3,17 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ZappyAPI.Domain.Entities.Common;
 
-namespace ZappyAPI.Domain.Entities
+namespace ZappyAPI.Application.Abstractions.DTOs.LoginHistory
 {
-    public class LoginHistory : BaseEntity
+    public class CreateLoginHistory
     {
         public required Guid UserId { get; set; }
         public required string IpAdress { get; set; }
         public required string UserAgent { get; set; }
         public required bool Succeeded { get; set; }
-
-        public User User { get; set; }
     }
 }

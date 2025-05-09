@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,12 @@ namespace ZappyAPI.Persistence.Repositories
         public UserReadRepository(ZappyAPIDbContext context) : base(context)
         {
             _context = context;
+        }
+        public DbSet<User> Table => _context.Set<User>();
+
+        public async Task<User?> GetUserByUsernameAsync(string username)
+        {
+            return await Table.FirstOrDefaultAsync(x => x.Username == username);
         }
     }
 }

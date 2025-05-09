@@ -6,9 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZappyAPI.Application.Abstractions.Services;
 using ZappyAPI.Application.Repositories;
 using ZappyAPI.Persistence.Contexts;
 using ZappyAPI.Persistence.Repositories;
+using ZappyAPI.Persistence.Services;
 
 namespace ZappyAPI.Persistence
 {
@@ -70,6 +72,14 @@ namespace ZappyAPI.Persistence
 
             services.AddScoped<IUserStatusReadRepository, UserStatusReadRepository>();
             services.AddScoped<IUserStatusWriteRepository, UserStatusWriteRepository>();
+
+            //Services
+
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuditLogService, AuditLogService>();
+            services.AddScoped<ILoginHistoryService, LoginHistoryService>();
+            services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+            services.AddScoped<ISessionService, SessionService>();
 
         }
     }
