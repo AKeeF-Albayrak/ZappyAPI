@@ -12,9 +12,11 @@ namespace ZappyAPI.Persistence.Services
     public class SessionService : ISessionService
     {
         private readonly ISessionWriteRepository _sessionWriteRepository;
-        public SessionService(ISessionWriteRepository sessionWriteRepository)
+        private readonly IUserStatusWriteRepository _userStatusWriteRepository;
+        public SessionService(ISessionWriteRepository sessionWriteRepository, IUserStatusWriteRepository userStatusWriteRepository)
         {
             _sessionWriteRepository = sessionWriteRepository;
+            _userStatusWriteRepository = userStatusWriteRepository;
         }
         public async Task<CreateSessionResponse> CreateAsync(CreateSession model)
         {
@@ -35,6 +37,22 @@ namespace ZappyAPI.Persistence.Services
             {
                 Id = id,
                 Succeeded = affected_rows == 1,
+            };
+        }
+
+        public async Task<OfflineSessionResponse> OfflineSessions(Guid userId)
+        {
+            var token = await _sessionWriteRepository.OfflineOthersAsync(userId);
+            await _sessionWriteRepository.SaveAsync();
+            if (token == null) return new OfflineSessionResponse { Succeeded = false };
+
+            await _userStatusWriteRepository.OfflineAsync(userId);
+            await _userStatusWriteRepository.SaveAsync();
+
+            return new OfflineSessionResponse
+            {
+                Succeeded = true,
+                TokenId = (Guid)token
             };
         }
     }

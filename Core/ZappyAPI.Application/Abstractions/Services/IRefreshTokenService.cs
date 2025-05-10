@@ -11,5 +11,6 @@ namespace ZappyAPI.Application.Abstractions.Services
     public interface IRefreshTokenService
     {
         Task<CreateTokenResponse> CreateAsync(CreateRefreshToken model);
+        Task<bool> DisableOldTokensAsync(Guid id);
     }
 }

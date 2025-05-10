@@ -11,5 +11,6 @@ namespace ZappyAPI.Application.Abstractions.Services
     public interface ISessionService
     {
         Task<CreateSessionResponse> CreateAsync(CreateSession model);
+        Task<OfflineSessionResponse> OfflineSessions(Guid userId);
     }
 }

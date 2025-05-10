@@ -70,11 +70,12 @@ namespace ZappyAPI.Persistence.Services
 
         public async Task<LoginUserResponse> LoginUserAsync(string userName, string password)
         {
-            // TODO: Add UserStatus Online and Add Logout
             var user = await _userReadRepository.GetUserByUsernameAsync(userName);
 
             if(user != null && await _hashPassword.VerifyPasswordAsync(password, user.HashedPassword))
             {
+                await _userStatusWriteRepository.OnlineAsync(user.Id);
+                await _userStatusWriteRepository.SaveAsync();
                 return new LoginUserResponse
                 {
                     Succeeded = true,

@@ -9,5 +9,7 @@ namespace ZappyAPI.Application.Repositories
 {
     public interface IUserStatusWriteRepository : IWriteRepository<UserStatus>
     {
+        Task<bool> OnlineAsync(Guid userId);
+        Task<bool> OfflineAsync(Guid userId);
     }
 }

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZappyAPI.Application.Features.Command.User.CreateUser;
 using ZappyAPI.Application.Features.Command.User.LoginUser;
+using ZappyAPI.Application.Features.Command.User.LogoutUser;
+using ZappyAPI.Application.Repositories;
 
 namespace ZappyAPI.API.Controllers
 {
@@ -30,5 +32,11 @@ namespace ZappyAPI.API.Controllers
             return Ok(response);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Logout([FromBody] LogoutUserCommandRequest request)
+        {
+            LogoutUserCommandResponse response = await _mediator.Send(request);
+            return Ok(response);
+        }
     }
 }

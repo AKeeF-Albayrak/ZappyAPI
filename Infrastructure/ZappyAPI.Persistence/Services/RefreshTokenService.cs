@@ -13,13 +13,14 @@ namespace ZappyAPI.Persistence.Services
     public class RefreshTokenService : IRefreshTokenService
     {
         readonly IRefreshTokenWriteRepository _refreshTokenWriteRepository;
-        public RefreshTokenService(IRefreshTokenWriteRepository refreshTokenWriteRepository)
+        readonly IRefreshTokenReadRepository _refreshTokenReadRepository;
+        public RefreshTokenService(IRefreshTokenWriteRepository refreshTokenWriteRepository, IRefreshTokenReadRepository refreshTokenReadRepository)
         {
             _refreshTokenWriteRepository = refreshTokenWriteRepository;
+            _refreshTokenReadRepository = refreshTokenReadRepository;
         }
         public async Task<CreateTokenResponse> CreateAsync(CreateRefreshToken model)
         {
-            // TODO: Add Disable Old Tokens
             var randomBytes = RandomNumberGenerator.GetBytes(64);
             var id = Guid.NewGuid();
 
@@ -38,6 +39,19 @@ namespace ZappyAPI.Persistence.Services
                 Succeeded = affectedRows == 1,
                 TokenId = id,
             };
+        }
+
+        public async Task<bool> DisableOldTokensAsync(Guid id)
+        {
+            var token = await _refreshTokenReadRepository.GetByIdAsync(id);
+            
+            if (token == null) return false;
+
+            token.Revoked = true;
+
+            _refreshTokenWriteRepository.Update(token);
+            await _refreshTokenWriteRepository.SaveAsync();
+            return true;
         }
     }
 }

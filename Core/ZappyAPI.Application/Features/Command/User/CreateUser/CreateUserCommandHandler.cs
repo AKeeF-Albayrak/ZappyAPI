@@ -22,10 +22,18 @@ namespace ZappyAPI.Application.Features.Command.User.CreateUser
         }
         public async Task<CreateUserCommandResponse> Handle(CreateUserCommandRequest request, CancellationToken cancellationToken)
         {
-            // TODO: PASSWORD KISITLAMALARI
+            if (!IsPasswordValid(request.Password, out string passwordError))
+            {
+                return new CreateUserCommandResponse
+                {
+                    Succeeded = false,
+                    Message = $"Parola geçerli değil: {passwordError}"
+                };
+            }
+
             UploadResult? result = null;
 
-            if(request.ProfilePicture != null)
+            if (request.ProfilePicture != null)
             {
                 result = await _storageService.UploadAsync(new Upload
                 {
@@ -60,5 +68,43 @@ namespace ZappyAPI.Application.Features.Command.User.CreateUser
                 Message = response.Message
             };
         }
+
+        private bool IsPasswordValid(string password, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            if (password.Length < 8)
+            {
+                errorMessage = "En az 8 karakter olmalıdır.";
+                return false;
+            }
+
+            if (!password.Any(char.IsUpper))
+            {
+                errorMessage = "En az bir büyük harf içermelidir.";
+                return false;
+            }
+
+            if (!password.Any(char.IsLower))
+            {
+                errorMessage = "En az bir küçük harf içermelidir.";
+                return false;
+            }
+
+            if (!password.Any(char.IsDigit))
+            {
+                errorMessage = "En az bir rakam içermelidir.";
+                return false;
+            }
+
+            if (!password.Any(ch => "!@#$%^&*()_+-=[]{}|;:',.<>/?".Contains(ch)))
+            {
+                errorMessage = "En az bir özel karakter içermelidir.";
+                return false;
+            }
+
+            return true;
+        }
+
     }
 }
