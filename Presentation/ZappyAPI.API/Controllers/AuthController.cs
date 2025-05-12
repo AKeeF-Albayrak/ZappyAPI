@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZappyAPI.Application.Features.Command.User.CreateUser;
@@ -33,6 +34,7 @@ namespace ZappyAPI.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Logout([FromBody] LogoutUserCommandRequest request)
         {
             LogoutUserCommandResponse response = await _mediator.Send(request);

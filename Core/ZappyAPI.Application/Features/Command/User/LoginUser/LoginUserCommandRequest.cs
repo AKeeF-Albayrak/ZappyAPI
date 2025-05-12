@@ -15,5 +15,5 @@ namespace ZappyAPI.Application.Features.Command.User.LoginUser
         public  required string DeviceInfo { get; set; }
         // TODO: Auto Fill UserAgent
         public required string UserAgent { get; set; }
-    }
+    }                                         
 }

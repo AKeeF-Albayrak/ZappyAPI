@@ -10,7 +10,7 @@ namespace ZappyAPI.Application.Abstractions.Services
     public interface IStorageService
     {
         Task<UploadResult> UploadAsync(Upload upload);
-        Task<byte[]> GetAsync(string fileName);
-        Task<bool> DeleteAsync(string fileName);
+        Task<byte[]> GetAsync(string filePath);
+        Task<bool> DeleteAsync(string filePath);
     }
 }

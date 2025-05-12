@@ -49,38 +49,34 @@ namespace ZappyAPI.Infrastructure.Storage
         }
 
 
-        public async Task<byte[]> GetAsync(string fileName)
+        public async Task<byte[]> GetAsync(string filePath)
         {
-            var allSubFolders = new[] { "photos", "videos", "audios" };
+            var sanitizedPath = filePath.Replace("/", Path.DirectorySeparatorChar.ToString());
+            var fullPath = Path.Combine(_mediaRootPath, sanitizedPath.TrimStart(Path.DirectorySeparatorChar));
 
-            foreach (var folder in allSubFolders)
-            {
-                var path = Path.Combine(_mediaRootPath, folder, fileName);
-                if (File.Exists(path))
-                {
-                    return await File.ReadAllBytesAsync(path);
-                }
-            }
+            if (!File.Exists(fullPath))
+                throw new FileNotFoundException("Dosya bulunamadı.", filePath);
 
-            throw new FileNotFoundException("Dosya bulunamadı", fileName);
+            return await File.ReadAllBytesAsync(fullPath);
         }
 
-        public Task<bool> DeleteAsync(string fileName)
+        public Task<bool> DeleteAsync(string filePath)
         {
-            var allSubFolders = new[] { "photos", "videos", "audios" };
+            var sanitizedPath = filePath.Replace("/", Path.DirectorySeparatorChar.ToString());
+            var fullPath = Path.Combine(_mediaRootPath, sanitizedPath.TrimStart(Path.DirectorySeparatorChar));
 
-            foreach (var folder in allSubFolders)
+            if (!fullPath.StartsWith(_mediaRootPath))
+                throw new UnauthorizedAccessException("Geçersiz dosya yolu.");
+
+            if (File.Exists(fullPath))
             {
-                var path = Path.Combine(_mediaRootPath, folder, fileName);
-                if (File.Exists(path))
-                {
-                    File.Delete(path);
-                    return Task.FromResult(true);
-                }
+                File.Delete(fullPath);
+                return Task.FromResult(true);
             }
 
             return Task.FromResult(false);
         }
+
 
         private string GetMediaSubFolder(string contentType)
         {
