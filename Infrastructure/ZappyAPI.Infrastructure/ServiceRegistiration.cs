@@ -15,6 +15,7 @@ namespace ZappyAPI.Infrastructure
         public static void AddInfrastructureServices(this IServiceCollection services)
         {
             services.AddScoped<IStorageService, StorageService>();
+            services.AddScoped<IChatHubService, ChatHubService>();
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZappyAPI.Application.Abstractions.DTOs.Message;
+using ZappyAPI.Application.ViewModels.User;
 using ZappyAPI.Domain.Entities;
 
 namespace ZappyAPI.Application.ViewModels.Group
@@ -13,6 +14,6 @@ namespace ZappyAPI.Application.ViewModels.Group
         public Guid GroupId { get; set; }
         public byte[] GroupPhoto { get; set; }
         public MessageDto LastMessage { get; set; }
-        public string GroupName { get; set; }
+        public string GroupName { get; set; } 
     }
 }

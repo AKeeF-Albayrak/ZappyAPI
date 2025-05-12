@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Features\Query\Group\GetGroup\" />
     <Folder Include="Features\Query\User\" />
   </ItemGroup>
 
