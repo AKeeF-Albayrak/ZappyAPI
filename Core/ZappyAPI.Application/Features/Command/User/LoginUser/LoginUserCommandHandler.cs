@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using ZappyAPI.Application.Abstractions.Helper;
@@ -17,72 +18,89 @@ namespace ZappyAPI.Application.Features.Command.User.LoginUser
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly ISessionService _sessionService;
         private readonly IAuditLogService _auditLogService;
-        public LoginUserCommandHandler(IUserService userService, ILoginHistoryService loginHistoryService, IRefreshTokenService refreshTokenService, ISessionService sessionService, IAuditLogService auditLogService)
+        private readonly TokenService _tokenService;
+        public LoginUserCommandHandler(IUserService userService, ILoginHistoryService loginHistoryService, IRefreshTokenService refreshTokenService, ISessionService sessionService, IAuditLogService auditLogService, TokenService tokenService)
         {
             _userService = userService;
             _loginHistoryService = loginHistoryService;
             _refreshTokenService = refreshTokenService;
             _sessionService = sessionService;
             _auditLogService = auditLogService;
+            _tokenService = tokenService;
         }
         public async Task<LoginUserCommandRepsonse> Handle(LoginUserCommandRequest request, CancellationToken cancellationToken)
         {
             var response = await _userService.LoginUserAsync(request.UserName, request.Password);
-            if (response.Succeeded)
+            if (!response.Succeeded)
             {
-                var res1 = await _loginHistoryService.CreateAsync(new Abstractions.DTOs.LoginHistory.CreateLoginHistory
-                {
-                    Succeeded = true,
-                    IpAdress = request.IpAdress,
-                    UserAgent = request.UserAgent,
-                    UserId = response.UserId,
-                });
-
-                var res2 = await _refreshTokenService.CreateAsync(new Abstractions.DTOs.Token.CreateRefreshToken
-                {
-                    UserId = response.UserId
-                });
-
-                var res3 = await _sessionService.CreateAsync(new Abstractions.DTOs.Session.CreateSession
-                {
-                    UserId = response.UserId,
-                    DeviceInfo = request.DeviceInfo,
-                    IpAdress = request.IpAdress,
-                    RefreshTokenId = res2.TokenId
-                });
-
-                await _auditLogService.CreateAsync(res1.Succeeded,new Abstractions.DTOs.AuditLog.CreateAuditLog
-                {
-                    Action = Domain.Enums.AuditAction.Create,
-                    TargetId = res1.Id,
-                    TargetType = Domain.Enums.AuditLog_TargetType.LoginHistory,
-                    UserId = response.UserId,
-                });
-                await _auditLogService.CreateAsync(res2.Succeeded, new Abstractions.DTOs.AuditLog.CreateAuditLog
-                {
-                    Action = Domain.Enums.AuditAction.Create,
-                    TargetId = res2.TokenId,
-                    TargetType = Domain.Enums.AuditLog_TargetType.RefreshToken,
-                    UserId = response.UserId,
-                });
-                await _auditLogService.CreateAsync(res3.Succeeded, new Abstractions.DTOs.AuditLog.CreateAuditLog
-                {
-                    Action = Domain.Enums.AuditAction.Create,
-                    TargetId = res3.Id,
-                    TargetType = Domain.Enums.AuditLog_TargetType.Session,
-                    UserId = response.UserId,
-                });
-
                 return new LoginUserCommandRepsonse
                 {
-                    Succeeded = res1.Succeeded && res2.Succeeded && res3.Succeeded,
-                    Message = res1.Succeeded && res2.Succeeded && res3.Succeeded ? "Succeeded" : "Something Went Wrong!" 
+                    Succeeded = false,
+                    Message = "Wrong Password or Username"
                 };
             }
+
+            var loginHistoryResult = await _loginHistoryService.CreateAsync(new Abstractions.DTOs.LoginHistory.CreateLoginHistory
+            {
+                Succeeded = true,
+                IpAdress = request.IpAdress,
+                UserAgent = request.UserAgent,
+                UserId = response.UserId,
+            });
+
+            var refreshTokenResult = await _refreshTokenService.CreateAsync(new Abstractions.DTOs.Token.CreateRefreshToken
+            {
+                UserId = response.UserId
+            });
+
+            var sessionResult = await _sessionService.CreateAsync(new Abstractions.DTOs.Session.CreateSession
+            {
+                UserId = response.UserId,
+                DeviceInfo = request.DeviceInfo,
+                IpAdress = request.IpAdress,
+                RefreshTokenId = refreshTokenResult.TokenId
+            });
+
+            await _auditLogService.CreateAsync(loginHistoryResult.Succeeded, new Abstractions.DTOs.AuditLog.CreateAuditLog
+            {
+                Action = AuditAction.Create,
+                TargetId = loginHistoryResult.Id,
+                TargetType = AuditLog_TargetType.LoginHistory,
+                UserId = response.UserId,
+            });
+
+            await _auditLogService.CreateAsync(refreshTokenResult.Succeeded, new Abstractions.DTOs.AuditLog.CreateAuditLog
+            {
+                Action = AuditAction.Create,
+                TargetId = refreshTokenResult.TokenId,
+                TargetType = AuditLog_TargetType.RefreshToken,
+                UserId = response.UserId,
+            });
+
+            await _auditLogService.CreateAsync(sessionResult.Succeeded, new Abstractions.DTOs.AuditLog.CreateAuditLog
+            {
+                Action = AuditAction.Create,
+                TargetId = sessionResult.Id,
+                TargetType = AuditLog_TargetType.Session,
+                UserId = response.UserId,
+            });
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, response.UserId.ToString()),
+                new Claim(ClaimTypes.Name, request.UserName),
+                new Claim(ClaimTypes.Role, "User")
+            };
+            var accessToken = _tokenService.GenerateAccessToken(claims);
+
             return new LoginUserCommandRepsonse
             {
-                Succeeded = false,
-                Message = "Wrong Password or Username"
+                Succeeded = loginHistoryResult.Succeeded && refreshTokenResult.Succeeded && sessionResult.Succeeded,
+                Message = loginHistoryResult.Succeeded && refreshTokenResult.Succeeded && sessionResult.Succeeded
+                    ? "Succeeded"
+                    : "Something Went Wrong!",
+                AccessToken = accessToken,
+                RefreshToken = refreshTokenResult.Token
             };
         }
     }

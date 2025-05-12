@@ -10,5 +10,8 @@ namespace ZappyAPI.Application.Features.Command.User.LoginUser
     {
         public bool Succeeded { get; set; }
         public string Message { get; set; }
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
+
     }
 }

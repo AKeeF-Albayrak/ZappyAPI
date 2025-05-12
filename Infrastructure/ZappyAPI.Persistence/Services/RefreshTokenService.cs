@@ -23,11 +23,12 @@ namespace ZappyAPI.Persistence.Services
         {
             var randomBytes = RandomNumberGenerator.GetBytes(64);
             var id = Guid.NewGuid();
+            var token = Convert.ToBase64String(randomBytes);
 
             var res = await _refreshTokenWriteRepository.AddAsync(new Domain.Entities.RefreshToken
             {
                 Id = id,
-                Token = Convert.ToBase64String(randomBytes),
+                Token = token,
                 CreatedDate = DateTime.UtcNow,
                 ExpireDate = DateTime.UtcNow.AddDays(7),
                 UserId = model.UserId,
@@ -37,6 +38,7 @@ namespace ZappyAPI.Persistence.Services
             return new CreateTokenResponse
             {
                 Succeeded = affectedRows == 1,
+                Token = token,
                 TokenId = id,
             };
         }

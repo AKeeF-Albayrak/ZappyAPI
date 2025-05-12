@@ -80,6 +80,7 @@ namespace ZappyAPI.Persistence
             services.AddScoped<ILoginHistoryService, LoginHistoryService>();
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<IGroupService, GroupService>();
 
         }
     }
