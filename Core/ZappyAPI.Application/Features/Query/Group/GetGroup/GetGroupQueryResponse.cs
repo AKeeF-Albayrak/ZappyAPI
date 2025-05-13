@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ZappyAPI.Application.Abstractions.DTOs.Message;
 using ZappyAPI.Application.ViewModels.Message;
 using ZappyAPI.Application.ViewModels.User;
-using ZappyAPI.Domain.Entities;
 
-namespace ZappyAPI.Application.ViewModels.Group
+namespace ZappyAPI.Application.Features.Query.Group.GetGroup
 {
-    public class GroupMessageViewModel
+    public class GetGroupQueryResponse
     {
+        public bool Succeeded { get; set; }
         public Guid Id { get; set; }
         public string Name { get; set; }
         public byte[] GroupPicture { get; set; }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZappyAPI.Application.Features.Command.Group.CreateGroup;
+using ZappyAPI.Application.Features.Query.Group.GetGroup;
 using ZappyAPI.Application.Features.Query.Group.GetGroups;
 
 namespace ZappyAPI.API.Controllers
@@ -22,6 +23,14 @@ namespace ZappyAPI.API.Controllers
         public async Task<IActionResult> CreateGroup([FromBody] CreateGroupCommandRequest request)
         {
             CreateGroupCommandResponse response = await _mediator.Send(request);
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetGroup([FromQuery] GetGroupQueryRequest request)
+        {
+            GetGroupQueryResponse response = await _mediator.Send(request);
             return Ok(response);
         }
 

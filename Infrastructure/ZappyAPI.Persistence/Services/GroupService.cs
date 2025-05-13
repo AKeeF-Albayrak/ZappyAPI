@@ -7,6 +7,8 @@ using ZappyAPI.Application.Abstractions.DTOs.Group;
 using ZappyAPI.Application.Abstractions.Services;
 using ZappyAPI.Application.Repositories;
 using ZappyAPI.Application.ViewModels.Group;
+using ZappyAPI.Application.ViewModels.Message;
+using ZappyAPI.Application.ViewModels.User;
 using ZappyAPI.Domain.Entities;
 using ZappyAPI.Persistence.Repositories;
 
@@ -18,12 +20,15 @@ namespace ZappyAPI.Persistence.Services
         private readonly IMessageReadRepository _messageReadRepository;
         private readonly IStorageService _storageService;
         private readonly IGroupWriteRepository _groupWriteRepository;
-        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository)
+        private readonly IGroupReadRepository _groupReadRepository;
+        private readonly IUserReadRepository _userReadRepository;
+        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository)
         {
             _participantReadRepository = participantReadRepository;
             _messageReadRepository = messageReadRepository;
             _storageService = storageService;
             _groupWriteRepository = groupWriteRepository;
+            _groupReadRepository = groupReadRepository;
         }
 
         public async Task<bool> CreateGroup(CreateGroup createGroup)
@@ -73,10 +78,58 @@ namespace ZappyAPI.Persistence.Services
             });
 
             var affected_rows = await _groupWriteRepository.SaveAsync();
+            return affected_rows > 1;
+        }
 
-            return new CreateGroupResponse
+        public async Task<GetGroupResponse> GetGroup(Guid groupId)
+        {
+            var group = await _groupReadRepository.GetByIdAsync(groupId);
+
+            if (group == null)
             {
-                Succeeded = affected_rows > 1,
+                return new GetGroupResponse{
+                    Succeeded = false,
+                };
+            }
+
+            List<UserViewModel> users = new List<UserViewModel>();
+            List<MessageViewModel> messages = new List<MessageViewModel>();
+
+            foreach(var message in group.Messages)
+            {
+                messages.Add(new MessageViewModel
+                {
+                    Id = message.Id,
+                    SenderId = message.SenderId,
+                    ContentType = message.ContentType,
+                    CreatedDate = message.CreatedDate,
+                    EncryptedContent = message.EncryptedContent,
+                    IsPinned = message.IsPinned,
+                    RepliedMessageId = message.RepliedMessageId,
+                });
+            }
+
+            foreach(var participant in group.Participants)
+            {
+                var user = await _userReadRepository.GetByIdAsync(participant.UserId);
+                users.Add(new UserViewModel
+                {
+                    Id = user.Id,
+                    isOnline = false,
+                    Username = user.Username,
+                    ProfilePicture = await _storageService.GetAsync(user.ProfilePicPath)
+                });
+            }
+            // TODO: Change IsOnline With Signlr Hub
+
+            return new GetGroupResponse
+            {
+                Succeeded = true,
+                Id = groupId,
+                GroupPicture = await _storageService.GetAsync(group.GroupPicPath),
+                Name = group.GroupName,
+                Messages = messages,
+                Users = users
             };
         }
 
@@ -104,6 +157,6 @@ namespace ZappyAPI.Persistence.Services
 
             return groupViewModels;
         }
-
+        // TODO: Change GroupViewModel TO DTO   
     }
 }

@@ -81,6 +81,7 @@ namespace ZappyAPI.Persistence
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<ISessionService, SessionService>();
             services.AddScoped<IGroupService, GroupService>();
+            services.AddScoped<IFriendshipService, FriendshipService>();
 
         }
     }

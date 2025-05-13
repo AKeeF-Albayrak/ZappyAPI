@@ -1,0 +1,55 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ZappyAPI.Application.Abstractions.DTOs.Friendship;
+using ZappyAPI.Application.Abstractions.Services;
+using ZappyAPI.Application.Repositories;
+
+namespace ZappyAPI.Persistence.Services
+{
+    public class FriendshipService : IFriendshipService
+    {
+        private readonly IFriendshipWriteRepository _friendshipWriteRepository;
+        private readonly IFriendshipReadRepository _friendshipReadRepository;
+        public FriendshipService(IFriendshipWriteRepository friendshipWriteRepository, IFriendshipReadRepository friendshipReadRepository)
+        {
+            _friendshipWriteRepository = friendshipWriteRepository;
+            _friendshipReadRepository = friendshipReadRepository;
+        }
+
+        public async Task<bool> CreateFriendship(CreateFriendship model)
+        {
+            await _friendshipWriteRepository.AddAsync(new Domain.Entities.Friendship
+            {
+                Id = Guid.NewGuid(),
+                CreatedDate = DateTime.UtcNow,
+                Status = Domain.Enums.FriendshipStatus.Pending,
+                UserId_1 = model.UserId_1,
+                UserId_2 = model.UserId_2,
+            });
+
+            int affected_rows = await _friendshipWriteRepository.SaveAsync();
+
+            return affected_rows > 0;
+        }
+
+        public async Task<bool> UpdateFriendship(UpdateFriendship model)
+        {
+            var friendship = await _friendshipReadRepository.GetByIdAsync(model.Id);
+
+            if (friendship == null)
+            {
+                return false;
+            }
+
+            friendship.Status = model.Status;
+
+            _friendshipWriteRepository.Update(friendship);
+
+            int affected_rows = await _friendshipWriteRepository.SaveAsync();
+            return affected_rows > 0;
+        }
+    }
+}
