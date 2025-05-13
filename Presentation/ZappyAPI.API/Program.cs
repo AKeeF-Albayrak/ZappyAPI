@@ -84,3 +84,4 @@ app.MapControllers();
 app.MapHub<ChatHub>("/hub/chat").RequireAuthorization();
 
 app.Run();
+// TODO: Update user id 

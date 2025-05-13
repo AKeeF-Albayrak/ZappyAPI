@@ -11,7 +11,7 @@ namespace ZappyAPI.Domain.Entities
     {
         public required Guid UserId { get; set; }
         public required string IpAdress { get; set; }
-        public required string UserAgent { get; set; } // TODO : Add Auto User Agent Later
+        public required string UserAgent { get; set; }
         public required bool Succeeded { get; set; }
 
         public User User { get; set; }

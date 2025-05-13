@@ -157,6 +157,5 @@ namespace ZappyAPI.Persistence.Services
 
             return groupViewModels;
         }
-        // TODO: Change GroupViewModel TO DTO   
     }
 }
