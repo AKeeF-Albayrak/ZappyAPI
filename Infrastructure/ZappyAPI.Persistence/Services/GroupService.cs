@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZappyAPI.Application.Abstractions.DTOs.Group;
+using ZappyAPI.Application.Abstractions.DTOs.GroupInvite;
 using ZappyAPI.Application.Abstractions.Services;
 using ZappyAPI.Application.Repositories;
 using ZappyAPI.Application.ViewModels.Group;
@@ -23,7 +24,9 @@ namespace ZappyAPI.Persistence.Services
         private readonly IGroupReadRepository _groupReadRepository;
         private readonly IUserReadRepository _userReadRepository;
         private readonly IUserContext _userContext;
-        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext)
+        private readonly IGroupInviteWriteRepository _groupInviteWriteRepository;
+        private readonly IGroupInviteReadRepository _groupInviteReadRepository;
+        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext, IGroupInviteWriteRepository groupInviteWriteRepository, IGroupInviteReadRepository groupInviteReadRepository)
         {
             _participantReadRepository = participantReadRepository;
             _messageReadRepository = messageReadRepository;
@@ -31,6 +34,8 @@ namespace ZappyAPI.Persistence.Services
             _groupWriteRepository = groupWriteRepository;
             _groupReadRepository = groupReadRepository;
             _userContext = userContext;
+            _groupInviteWriteRepository = groupInviteWriteRepository;
+            _groupInviteReadRepository = groupInviteReadRepository;
         }
 
         public async Task<bool> CreateGroup(CreateGroup createGroup)
@@ -195,5 +200,53 @@ namespace ZappyAPI.Persistence.Services
                 Groups = groupViewModels
             };
         }
+
+        public async Task<bool> InviteGroup(CreateGroupInvite model)
+        {
+            var currentUserId = _userContext.UserId;
+            if (currentUserId == null || currentUserId != model.InviterUserId)
+                return false;
+
+            var group = await _groupReadRepository.GetByIdAsync(model.GroupId);
+            if (group == null || !group.Participants.Any(p => p.UserId == currentUserId))
+                return false;
+
+            await _groupInviteWriteRepository.AddAsync(new GroupInvite
+            {
+                Id = Guid.NewGuid(),
+                GroupId = model.GroupId,
+                Status = Domain.Enums.GroupInviteStatus.Pending,
+                CreatedDate = DateTime.UtcNow,
+                InvitedUserId = model.InvitedUserId,
+                InviterUserId = model.InviterUserId,
+            });
+
+            int affected_rows = await _groupInviteWriteRepository.SaveAsync();
+            return affected_rows > 0;
+        }
+
+
+        public async Task<bool> RespondGroupInvite(RespondGroupInvite model)
+        {
+            var currentUserId = _userContext.UserId;
+            if (currentUserId == null)
+                return false;
+
+            var invite = await _groupInviteReadRepository.GetByIdAsync(model.Id);
+            if (invite == null || invite.InvitedUserId != currentUserId)
+                return false;
+
+            if (model.Status != Domain.Enums.GroupInviteStatus.Pending && invite.Status == Domain.Enums.GroupInviteStatus.Pending)
+            {
+                invite.Status = model.Status;
+                invite.RespondedDate = DateTime.UtcNow;
+                _groupInviteWriteRepository.Update(invite);
+                await _groupInviteWriteRepository.SaveAsync();
+                return true;
+            }
+
+            return false;
+        }
+
     }
 }

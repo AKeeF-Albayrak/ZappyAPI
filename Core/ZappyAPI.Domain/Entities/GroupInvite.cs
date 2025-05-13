@@ -14,7 +14,7 @@ namespace ZappyAPI.Domain.Entities
         public required Guid InviterUserId { get; set; }
         public required Guid InvitedUserId { get; set; }
         public required GroupInviteStatus Status { get; set; }
-        public required DateTime RespondedDate { get; set; }
+        public DateTime RespondedDate { get; set; }
 
         public Group Group { get; set; }
         public User InviterUser { get; set; }
