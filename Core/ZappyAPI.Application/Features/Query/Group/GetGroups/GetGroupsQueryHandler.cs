@@ -17,12 +17,12 @@ namespace ZappyAPI.Application.Features.Query.Group.GetGroups
         }
         public async Task<GetGroupsQueryResponse> Handle(GetGroupsQueryRequest request, CancellationToken cancellationToken)
         {
-            var groups = await _groupService.GetGroups(request.UserId);
+            var response = await _groupService.GetGroups(request.UserId);
 
             return new GetGroupsQueryResponse
             {
-                Groups = groups,
-                Succeeded = true,
+                Groups = response.Groups,
+                Succeeded = response.Succeeded,
             };
         }
     }

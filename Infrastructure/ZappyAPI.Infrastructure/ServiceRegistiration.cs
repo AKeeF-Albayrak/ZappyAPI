@@ -16,6 +16,7 @@ namespace ZappyAPI.Infrastructure
         {
             services.AddScoped<IStorageService, StorageService>();
             services.AddScoped<IChatHubService, ChatHubService>();
+            services.AddScoped<IUserContext, UserContext>();
         }
     }
 }

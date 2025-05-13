@@ -22,17 +22,23 @@ namespace ZappyAPI.Persistence.Services
         private readonly IGroupWriteRepository _groupWriteRepository;
         private readonly IGroupReadRepository _groupReadRepository;
         private readonly IUserReadRepository _userReadRepository;
-        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository)
+        private readonly IUserContext _userContext;
+        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext)
         {
             _participantReadRepository = participantReadRepository;
             _messageReadRepository = messageReadRepository;
             _storageService = storageService;
             _groupWriteRepository = groupWriteRepository;
             _groupReadRepository = groupReadRepository;
+            _userContext = userContext;
         }
 
         public async Task<bool> CreateGroup(CreateGroup createGroup)
         {
+            if(_userContext.UserId == null || createGroup.UserId != _userContext.UserId)
+            {
+                return false;
+            }
             List<Participant> participants = new List<Participant>();
             Guid groupId = Guid.NewGuid();
 
@@ -83,19 +89,39 @@ namespace ZappyAPI.Persistence.Services
 
         public async Task<GetGroupResponse> GetGroup(Guid groupId)
         {
+            var userId = _userContext.UserId;
+
+            if (userId == null)
+            {
+                return new GetGroupResponse
+                {
+                    Succeeded = false
+                };
+            }
+
             var group = await _groupReadRepository.GetByIdAsync(groupId);
 
             if (group == null)
             {
-                return new GetGroupResponse{
-                    Succeeded = false,
+                return new GetGroupResponse
+                {
+                    Succeeded = false
+                };
+            }
+
+            var isParticipant = group.Participants.Any(p => p.UserId == userId);
+            if (!isParticipant)
+            {
+                return new GetGroupResponse
+                {
+                    Succeeded = false
                 };
             }
 
             List<UserViewModel> users = new List<UserViewModel>();
             List<MessageViewModel> messages = new List<MessageViewModel>();
 
-            foreach(var message in group.Messages)
+            foreach (var message in group.Messages)
             {
                 messages.Add(new MessageViewModel
                 {
@@ -109,7 +135,7 @@ namespace ZappyAPI.Persistence.Services
                 });
             }
 
-            foreach(var participant in group.Participants)
+            foreach (var participant in group.Participants)
             {
                 var user = await _userReadRepository.GetByIdAsync(participant.UserId);
                 users.Add(new UserViewModel
@@ -120,7 +146,8 @@ namespace ZappyAPI.Persistence.Services
                     ProfilePicture = await _storageService.GetAsync(user.ProfilePicPath)
                 });
             }
-            // TODO: Change IsOnline With Signlr Hub
+
+            // TODO: Change IsOnline With SignalR Hub
 
             return new GetGroupResponse
             {
@@ -133,9 +160,16 @@ namespace ZappyAPI.Persistence.Services
             };
         }
 
-        public async Task<List<GroupViewModel>> GetGroups(Guid userId)
+
+        public async Task<GetGroupsResponse> GetGroups(Guid userId)
         {
-            
+            if (_userContext.UserId == null || userId != _userContext.UserId)
+            {
+                return new GetGroupsResponse
+                {
+                    Succeeded = false,
+                };
+            }
             var userGroups = await _participantReadRepository.GetUsersGroupsAsync(userId);
 
             var groupViewModels = new List<GroupViewModel>();
@@ -155,7 +189,11 @@ namespace ZappyAPI.Persistence.Services
                 groupViewModels.Add(viewModel);
             }
 
-            return groupViewModels;
+            return new GetGroupsResponse
+            {
+                Succeeded = true,
+                Groups = groupViewModels
+            };
         }
     }
 }

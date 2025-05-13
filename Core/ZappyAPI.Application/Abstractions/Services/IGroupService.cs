@@ -11,7 +11,7 @@ namespace ZappyAPI.Application.Abstractions.Services
 {
     public interface IGroupService
     {
-        Task<List<GroupViewModel>> GetGroups(Guid userId); 
+        Task<GetGroupsResponse> GetGroups(Guid userId); 
         Task<GetGroupResponse> GetGroup(Guid groupId);
         Task<bool> CreateGroup(CreateGroup createGroup);
     }

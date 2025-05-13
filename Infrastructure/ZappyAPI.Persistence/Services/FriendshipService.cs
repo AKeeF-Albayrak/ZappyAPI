@@ -13,14 +13,20 @@ namespace ZappyAPI.Persistence.Services
     {
         private readonly IFriendshipWriteRepository _friendshipWriteRepository;
         private readonly IFriendshipReadRepository _friendshipReadRepository;
-        public FriendshipService(IFriendshipWriteRepository friendshipWriteRepository, IFriendshipReadRepository friendshipReadRepository)
+        private readonly IUserContext _userContext;
+        public FriendshipService(IFriendshipWriteRepository friendshipWriteRepository, IFriendshipReadRepository friendshipReadRepository, IUserContext userContext)
         {
             _friendshipWriteRepository = friendshipWriteRepository;
             _friendshipReadRepository = friendshipReadRepository;
+            _userContext = userContext;
         }
 
         public async Task<bool> CreateFriendship(CreateFriendship model)
         {
+            if (_userContext.UserId == null || !(_userContext.UserId == model.UserId_1 || _userContext.UserId == model.UserId_2))
+            {
+                return false;
+            }
             await _friendshipWriteRepository.AddAsync(new Domain.Entities.Friendship
             {
                 Id = Guid.NewGuid(),
@@ -40,6 +46,11 @@ namespace ZappyAPI.Persistence.Services
             var friendship = await _friendshipReadRepository.GetByIdAsync(model.Id);
 
             if (friendship == null)
+            {
+                return false;
+            }
+
+            if (_userContext.UserId == null || !(_userContext.UserId == friendship.UserId_1 || _userContext.UserId == friendship.UserId_2))
             {
                 return false;
             }

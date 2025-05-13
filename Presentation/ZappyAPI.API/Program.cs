@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ZappyAPI.API.Middleware;
 using ZappyAPI.Application;
 using ZappyAPI.Application.Abstractions.DTOs.Token;
 using ZappyAPI.Infrastructure;
@@ -70,6 +71,8 @@ var app = builder.Build();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<UserContextMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
