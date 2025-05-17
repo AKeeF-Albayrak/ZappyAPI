@@ -1,17 +1,42 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
+using ZappyAPI.Application.Abstractions.Services;
 
 namespace ZappyAPI.Infrastructure.SignalR
 {
-    [Authorize]
     public class ChatHub : Hub
     {
+        private readonly IUserStatusService _userStatusService;
+
+        public ChatHub(IUserStatusService userStatusService)
+        {
+            _userStatusService = userStatusService;
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            var userIdClaim = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdClaim, out var userId))
+            {
+                var connectionId = Context.ConnectionId;
+                await _userStatusService.UpdateUserStatusAsync(userId, Domain.Enums.User_Status.Online);
+            }
+
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            var userIdClaim = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdClaim, out var userId))
+            {
+                await _userStatusService.UpdateUserStatusAsync(userId, Domain.Enums.User_Status.Offline);
+            }
+
+            await base.OnDisconnectedAsync(exception);
+        }
+
         public async Task JoinChat(Guid groupId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, groupId.ToString());

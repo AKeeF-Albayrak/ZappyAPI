@@ -20,6 +20,11 @@ namespace ZappyAPI.Persistence.Repositories
 
         private DbSet<Participant> Table => _context.Set<Participant>();
 
+        public async Task<bool> CheckUserGroupAsync(Guid? userId, Guid groupId)
+        {
+            return await Table.AnyAsync(p => p.UserId == userId && p.GroupId == groupId);
+        }
+
         public async Task<List<Group>> GetUsersGroupsAsync(Guid userId)
         {
             return await Table

@@ -2,7 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
+using Claim = System.Security.Claims.Claim;
+using ClaimTypes = System.Security.Claims.ClaimTypes;
 using System.Text;
 using System.Threading.Tasks;
 using ZappyAPI.Application.Abstractions.Helper;
@@ -39,7 +40,6 @@ namespace ZappyAPI.Application.Features.Command.User.LoginUser
                     Message = "Wrong Password or Username"
                 };
             }
-
             var loginHistoryResult = await _loginHistoryService.CreateAsync(new Abstractions.DTOs.LoginHistory.CreateLoginHistory
             {
                 Succeeded = true,
@@ -91,6 +91,8 @@ namespace ZappyAPI.Application.Features.Command.User.LoginUser
                 new Claim(ClaimTypes.Name, request.UserName),
                 new Claim(ClaimTypes.Role, "User")
             };
+
+
             var accessToken = _tokenService.GenerateAccessToken(claims);
 
             return new LoginUserCommandRepsonse

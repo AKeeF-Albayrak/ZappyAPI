@@ -26,7 +26,9 @@ namespace ZappyAPI.Persistence.Services
         private readonly IUserContext _userContext;
         private readonly IGroupInviteWriteRepository _groupInviteWriteRepository;
         private readonly IGroupInviteReadRepository _groupInviteReadRepository;
-        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext, IGroupInviteWriteRepository groupInviteWriteRepository, IGroupInviteReadRepository groupInviteReadRepository)
+        private readonly IUserStatusReadRepository _userStatusReadRepository;
+        private readonly IChatHubService _chatHubService;
+        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext, IGroupInviteWriteRepository groupInviteWriteRepository, IGroupInviteReadRepository groupInviteReadRepository, IUserStatusReadRepository userStatusReadRepository, IChatHubService chatHubService)
         {
             _participantReadRepository = participantReadRepository;
             _messageReadRepository = messageReadRepository;
@@ -36,6 +38,8 @@ namespace ZappyAPI.Persistence.Services
             _userContext = userContext;
             _groupInviteWriteRepository = groupInviteWriteRepository;
             _groupInviteReadRepository = groupInviteReadRepository;
+            _userReadRepository = userReadRepository;
+            _chatHubService = chatHubService;
         }
 
         public async Task<bool> CreateGroup(CreateGroup createGroup)
@@ -170,12 +174,12 @@ namespace ZappyAPI.Persistence.Services
         {
             if (_userContext.UserId == null || userId != _userContext.UserId)
             {
-                return new GetGroupsResponse
-                {
-                    Succeeded = false,
-                };
+                return new GetGroupsResponse { Succeeded = false };
             }
+
             var userGroups = await _participantReadRepository.GetUsersGroupsAsync(userId);
+            var userStatus = await _userStatusReadRepository.GetByUserIdAsync(userId);
+            var connectionId = userStatus?.ConnectionId;
 
             var groupViewModels = new List<GroupViewModel>();
 
@@ -192,6 +196,9 @@ namespace ZappyAPI.Persistence.Services
                 };
 
                 groupViewModels.Add(viewModel);
+
+                if (!string.IsNullOrWhiteSpace(connectionId))
+                    await _chatHubService.JoinGroup(group.Id, connectionId);
             }
 
             return new GetGroupsResponse

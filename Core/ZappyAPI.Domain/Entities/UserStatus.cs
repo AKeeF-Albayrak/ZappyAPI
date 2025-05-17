@@ -12,7 +12,8 @@ namespace ZappyAPI.Domain.Entities
     {
         public required Guid UserId { get; set; }
         public required User_Status Status { get; set; }
-
+        public string? ConnectionId { get; set; }
+        public DateTime? LastSeen { get; set; }
         public User User { get; set; }
 
     }

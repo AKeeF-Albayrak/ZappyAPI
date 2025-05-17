@@ -10,5 +10,6 @@ namespace ZappyAPI.Application.Repositories
     public interface IParticipantReadRepository : IReadRepository<Participant>
     {
         Task<List<Group>> GetUsersGroupsAsync(Guid userId);
+        Task<bool> CheckUserGroupAsync(Guid? userId,  Guid groupId);
     }
 }

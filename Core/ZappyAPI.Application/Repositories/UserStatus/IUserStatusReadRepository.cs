@@ -9,5 +9,6 @@ namespace ZappyAPI.Application.Repositories
 {
     public interface IUserStatusReadRepository : IReadRepository<UserStatus>
     {
+        Task<UserStatus?> GetByUserIdAsync(Guid userId);
     }
 }

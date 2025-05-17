@@ -1,4 +1,5 @@
-﻿using ZappyAPI.Application.Abstractions.DTOs.Message;
+﻿using System.Runtime.CompilerServices;
+using ZappyAPI.Application.Abstractions.DTOs.Message;
 using ZappyAPI.Application.Abstractions.Services;
 using ZappyAPI.Application.Repositories;
 
@@ -9,15 +10,18 @@ namespace ZappyAPI.Persistence.Services
         private readonly IMessageWriteRepository _messageWriteRepository;
         private readonly IMessageReadRepository _messageReadRepository;
         private readonly IUserContext _userContext;
+        private readonly IChatHubService _chatHubService;
 
         public MessageService(
             IMessageWriteRepository messageWriteRepository,
             IMessageReadRepository messageReadRepository,
-            IUserContext userContext)
+            IUserContext userContext,
+            IChatHubService chatHubService)
         {
             _messageReadRepository = messageReadRepository;
             _messageWriteRepository = messageWriteRepository;
             _userContext = userContext;
+            _chatHubService = chatHubService;
         }
 
         public async Task<bool> CreateMessage(CreateMessage model)
@@ -26,7 +30,7 @@ namespace ZappyAPI.Persistence.Services
             if (userId == null || model.SenderId != userId)
                 return false;
 
-            await _messageWriteRepository.AddAsync(new Domain.Entities.Message
+            var messageEntity = new Domain.Entities.Message
             {
                 Id = Guid.NewGuid(),
                 CreatedDate = DateTime.UtcNow,
@@ -37,11 +41,24 @@ namespace ZappyAPI.Persistence.Services
                 IsDeleted = false,
                 IsPinned = model.IsPinned,
                 RepliedMessageId = model.RepliedMessageId,
-            });
+            };
 
+            await _messageWriteRepository.AddAsync(messageEntity);
             int affected_rows = await _messageWriteRepository.SaveAsync();
-            return affected_rows > 0;
+
+            if (affected_rows > 0)
+            {
+                await _chatHubService.SendMessageToGroup(
+                    model.GroupId,
+                    model.EncryptedContent,
+                    sender: userId.ToString()
+                );
+                return true;
+            }
+
+            return false;
         }
+
 
         public async Task<bool> DeleteMessage(Guid messageId)
         {
@@ -56,7 +73,16 @@ namespace ZappyAPI.Persistence.Services
             _messageWriteRepository.Update(message);
 
             int affected_rows = await _messageWriteRepository.SaveAsync();
-            return affected_rows > 0;
+            if (affected_rows > 0)
+            {
+                await _chatHubService.SendMessageToGroup(
+                    message.GroupId,
+                    $"Mesaj silindi (ID: {message.Id})",
+                    sender: userId.ToString()
+                );
+                return true;
+            }
+            return false ;
         }
 
         public async Task<bool> UpdateMessage(UpdateMessage model)
@@ -83,7 +109,16 @@ namespace ZappyAPI.Persistence.Services
 
             _messageWriteRepository.Update(message);
             int affected_rows = await _messageWriteRepository.SaveAsync();
-            return affected_rows > 0;
+            if (affected_rows > 0)
+            {
+                await _chatHubService.SendMessageToGroup(
+                    message.GroupId,
+                    message.EncryptedContent,
+                    sender: userId.ToString()
+                );
+                return true;
+            }
+            return false;
         }
     }
 }

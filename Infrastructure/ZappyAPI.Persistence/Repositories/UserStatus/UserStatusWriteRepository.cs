@@ -27,7 +27,9 @@ public class UserStatusWriteRepository : WriteRepository<UserStatus>, IUserStatu
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 Status = User_Status.Offline,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.UtcNow,
+                LastSeen = DateTime.UtcNow,
+                ConnectionId = ""
             };
             await Table.AddAsync(userStatus);
         }
@@ -50,13 +52,15 @@ public class UserStatusWriteRepository : WriteRepository<UserStatus>, IUserStatu
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 Status = User_Status.Online,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.UtcNow,
+                LastSeen = DateTime.UtcNow,
             };
             await Table.AddAsync(userStatus);
         }
         else
         {
             userStatus.Status = User_Status.Online;
+            userStatus.LastSeen = DateTime.UtcNow;
         }
 
         return await _context.SaveChangesAsync() > 0;

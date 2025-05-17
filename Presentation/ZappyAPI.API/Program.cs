@@ -84,6 +84,7 @@ app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.MapControllers();
 
-app.MapHub<ChatHub>("/hub/chat").RequireAuthorization();
+app.MapHub<ChatHub>("/hub/chat");
 
 app.Run();
+// TODO: Maybe Later Add QR Code GroupInvite, Friendship
