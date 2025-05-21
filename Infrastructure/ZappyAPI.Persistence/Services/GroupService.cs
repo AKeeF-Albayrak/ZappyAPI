@@ -1,16 +1,17 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZappyAPI.Application.Abstractions.DTOs.Group;
-using ZappyAPI.Application.Abstractions.DTOs.GroupInvite;
 using ZappyAPI.Application.Abstractions.Services;
 using ZappyAPI.Application.Repositories;
 using ZappyAPI.Application.ViewModels.Group;
 using ZappyAPI.Application.ViewModels.Message;
 using ZappyAPI.Application.ViewModels.User;
 using ZappyAPI.Domain.Entities;
+using ZappyAPI.Domain.Enums;
 using ZappyAPI.Persistence.Repositories;
 
 namespace ZappyAPI.Persistence.Services
@@ -24,11 +25,10 @@ namespace ZappyAPI.Persistence.Services
         private readonly IGroupReadRepository _groupReadRepository;
         private readonly IUserReadRepository _userReadRepository;
         private readonly IUserContext _userContext;
-        private readonly IGroupInviteWriteRepository _groupInviteWriteRepository;
-        private readonly IGroupInviteReadRepository _groupInviteReadRepository;
         private readonly IUserStatusReadRepository _userStatusReadRepository;
         private readonly IChatHubService _chatHubService;
-        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext, IGroupInviteWriteRepository groupInviteWriteRepository, IGroupInviteReadRepository groupInviteReadRepository, IUserStatusReadRepository userStatusReadRepository, IChatHubService chatHubService)
+        private readonly IMessageReadReadRepository _messageReadReadRepository;
+        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext,  IUserStatusReadRepository userStatusReadRepository, IChatHubService chatHubService, IMessageReadReadRepository messageReadReadRepository)
         {
             _participantReadRepository = participantReadRepository;
             _messageReadRepository = messageReadRepository;
@@ -36,10 +36,9 @@ namespace ZappyAPI.Persistence.Services
             _groupWriteRepository = groupWriteRepository;
             _groupReadRepository = groupReadRepository;
             _userContext = userContext;
-            _groupInviteWriteRepository = groupInviteWriteRepository;
-            _groupInviteReadRepository = groupInviteReadRepository;
             _userReadRepository = userReadRepository;
             _chatHubService = chatHubService;
+            _messageReadReadRepository = messageReadReadRepository;
         }
 
         public async Task<bool> CreateGroup(CreateGroup createGroup)
@@ -61,7 +60,9 @@ namespace ZappyAPI.Persistence.Services
                 IsDeleted = false,
             });
 
-            foreach(var userId in createGroup.UserIds)
+            var userIds = await _userReadRepository.GetUserIdsAsync(createGroup.Usernames);
+
+            foreach(var userId in userIds)
             {
                 participants.Add(new Participant
                 {
@@ -135,12 +136,13 @@ namespace ZappyAPI.Persistence.Services
                 messages.Add(new MessageViewModel
                 {
                     Id = message.Id,
-                    SenderId = message.SenderId,
                     ContentType = message.ContentType,
                     CreatedDate = message.CreatedDate,
                     EncryptedContent = message.EncryptedContent,
                     IsPinned = message.IsPinned,
                     RepliedMessageId = message.RepliedMessageId,
+                    SenderName = message.Sender.Username,
+                    IsUser = message.SenderId == userId,
                 });
             }
 
@@ -149,7 +151,6 @@ namespace ZappyAPI.Persistence.Services
                 var user = await _userReadRepository.GetByIdAsync(participant.UserId);
                 users.Add(new UserViewModel
                 {
-                    Id = user.Id,
                     isOnline = false,
                     Username = user.Username,
                     ProfilePicture = await _storageService.GetAsync(user.ProfilePicPath)
@@ -181,18 +182,41 @@ namespace ZappyAPI.Persistence.Services
             var userStatus = await _userStatusReadRepository.GetByUserIdAsync(userId);
             var connectionId = userStatus?.ConnectionId;
 
-            var groupViewModels = new List<GroupViewModel>();
+            var groupViewModels = new List<GroupsViewModel>();
 
             foreach (var group in userGroups)
             {
-                var lastMessage = await _messageReadRepository.GetLastMessageByGroupIdAsync(group.Id);
+                var messageDto = await _messageReadRepository.GetLastMessageByGroupIdAsync(group.Id);
 
-                var viewModel = new GroupViewModel
+                string content = "";
+
+                switch (messageDto.ContentType)
+                {
+                    case MessageContentType.Audio:
+                        content = "Audio";
+                        break;
+                    
+                    case MessageContentType.Picture:
+                        content = "Picture";
+                        break;
+
+                    default:
+                        break;
+                }
+                    
+                var viewModel = new GroupsViewModel
                 {
                     GroupId = group.Id,
                     GroupPhoto = await _storageService.GetAsync(group.GroupPicPath),
                     GroupName = group.GroupName,
-                    LastMessage = lastMessage
+                    LastMessage = new LastMessageViewModel
+                    {
+                        SenderName = messageDto.SenderName,
+                        Id = messageDto.Id,
+                        CreatedDate = messageDto.CreatedDate,
+                        Content = content,
+                        IsUser = messageDto.SenderId == userId,
+                    }
                 };
 
                 groupViewModels.Add(viewModel);
@@ -206,53 +230,6 @@ namespace ZappyAPI.Persistence.Services
                 Succeeded = true,
                 Groups = groupViewModels
             };
-        }
-
-        public async Task<bool> InviteGroup(CreateGroupInvite model)
-        {
-            var currentUserId = _userContext.UserId;
-            if (currentUserId == null || currentUserId != model.InviterUserId)
-                return false;
-
-            var group = await _groupReadRepository.GetByIdAsync(model.GroupId);
-            if (group == null || !group.Participants.Any(p => p.UserId == currentUserId))
-                return false;
-
-            await _groupInviteWriteRepository.AddAsync(new GroupInvite
-            {
-                Id = Guid.NewGuid(),
-                GroupId = model.GroupId,
-                Status = Domain.Enums.GroupInviteStatus.Pending,
-                CreatedDate = DateTime.UtcNow,
-                InvitedUserId = model.InvitedUserId,
-                InviterUserId = model.InviterUserId,
-            });
-
-            int affected_rows = await _groupInviteWriteRepository.SaveAsync();
-            return affected_rows > 0;
-        }
-
-
-        public async Task<bool> RespondGroupInvite(RespondGroupInvite model)
-        {
-            var currentUserId = _userContext.UserId;
-            if (currentUserId == null)
-                return false;
-
-            var invite = await _groupInviteReadRepository.GetByIdAsync(model.Id);
-            if (invite == null || invite.InvitedUserId != currentUserId)
-                return false;
-
-            if (model.Status != Domain.Enums.GroupInviteStatus.Pending && invite.Status == Domain.Enums.GroupInviteStatus.Pending)
-            {
-                invite.Status = model.Status;
-                invite.RespondedDate = DateTime.UtcNow;
-                _groupInviteWriteRepository.Update(invite);
-                await _groupInviteWriteRepository.SaveAsync();
-                return true;
-            }
-
-            return false;
         }
 
     }

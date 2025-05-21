@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,14 @@ namespace ZappyAPI.Persistence.Repositories
         public MessageReadReadRepository(ZappyAPIDbContext context) : base(context)
         {
             _context = context;
+        }
+        public DbSet<MessageRead> Table => _context.Set<MessageRead>();
+
+        public Task<List<MessageRead>> GetReadMessagesAsync(Guid groupId)
+        {
+            return Table
+                .Where(mr => mr.Message.GroupId == groupId)
+                .ToListAsync();
         }
     }
 }

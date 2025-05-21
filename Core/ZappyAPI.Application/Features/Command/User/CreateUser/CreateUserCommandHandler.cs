@@ -47,7 +47,7 @@ namespace ZappyAPI.Application.Features.Command.User.CreateUser
             {
                 Name = request.Name,
                 Mail = request.Mail,
-                Age = request.Age,
+                BirthDate = request.BirthDate,
                 Description = request.Description,
                 Password = request.Password,
                 ProfilePicturePath = result?.FilePath,

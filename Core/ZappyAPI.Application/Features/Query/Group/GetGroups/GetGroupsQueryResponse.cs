@@ -9,7 +9,7 @@ namespace ZappyAPI.Application.Features.Query.Group.GetGroups
 {
     public class GetGroupsQueryResponse
     {
-        public List<GroupViewModel> Groups { get; set; }
+        public List<GroupsViewModel> Groups { get; set; }
         public bool Succeeded { get; set; }
     }
 }

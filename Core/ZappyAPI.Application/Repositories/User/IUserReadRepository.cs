@@ -10,6 +10,7 @@ namespace ZappyAPI.Application.Repositories
     public interface IUserReadRepository : IReadRepository<User>
     {
         Task<User?> GetUserByUsernameAsync(string username);
+        Task<List<Guid>> GetUserIdsAsync(List<string> usernames);
     }
 
 }

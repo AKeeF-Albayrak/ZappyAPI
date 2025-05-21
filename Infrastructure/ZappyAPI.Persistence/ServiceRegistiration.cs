@@ -40,9 +40,6 @@ namespace ZappyAPI.Persistence
             services.AddScoped<IGroupReadRepository, GroupReadRepository>();
             services.AddScoped<IGroupWriteRepository, GroupWriteRepository>();
 
-            services.AddScoped<IGroupInviteReadRepository, GroupInviteReadRepository>();
-            services.AddScoped<IGroupInviteWriteRepository, GroupInviteWriteRepository>();
-
             services.AddScoped<ILoginHistoryReadRepository, LoginHistoryReadRepository>();
             services.AddScoped<ILoginHistoryWriteRepository, LoginHistoryWriteRepository>();
 

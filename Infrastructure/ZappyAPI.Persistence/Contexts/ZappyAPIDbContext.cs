@@ -15,7 +15,6 @@ namespace ZappyAPI.Persistence.Contexts
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<Friendship> Friendships { get; set; }
         public DbSet<Group> Groups { get; set; }
-        public DbSet<GroupInvite> GroupInvites { get; set; }
         public DbSet<LoginHistory> LoginHistories { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<MessageRead> MessageReads { get; set; }
@@ -48,24 +47,6 @@ namespace ZappyAPI.Persistence.Contexts
                 .HasOne(f => f.User_2)
                 .WithMany(u => u.Friendships_2)
                 .HasForeignKey(f => f.UserId_2)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<GroupInvite>()
-                .HasOne(i => i.Group)
-                .WithMany(g => g.Invites)
-                .HasForeignKey(i => i.GroupId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<GroupInvite>()
-                .HasOne(i => i.InviterUser)
-                .WithMany(u => u.InvitesSent)
-                .HasForeignKey(i => i.InviterUserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<GroupInvite>()
-                .HasOne(i => i.InvitedUser)
-                .WithMany(u => u.InvitesReceived)
-                .HasForeignKey(i => i.InvitedUserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<LoginHistory>()

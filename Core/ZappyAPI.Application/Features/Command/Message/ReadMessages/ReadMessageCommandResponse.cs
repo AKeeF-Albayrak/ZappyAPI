@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ZappyAPI.Application.Features.Command.GroupInvite.AddGroupInvite
+namespace ZappyAPI.Application.Features.Command.Message.ReadMessages
 {
-    public class AddGroupInviteCommandResponse
+    public class ReadMessageCommandResponse
     {
         public bool Succeeded { get; set; }
     }

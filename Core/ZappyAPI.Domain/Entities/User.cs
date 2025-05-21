@@ -15,13 +15,11 @@ namespace ZappyAPI.Domain.Entities
         public required string Mail { get; set; }
         public string? ProfilePicPath { get; set; }
         public string? Description { get; set; }
-        public int? Age { get; set; }
+        public DateOnly BirthDate { get; set; }
 
         public ICollection<Message> Messages { get; set; }
         public ICollection<Friendship> Friendships_1 { get; set; }
         public ICollection<Friendship> Friendships_2 { get; set; }
-        public ICollection<GroupInvite> InvitesSent { get; set; }
-        public ICollection<GroupInvite> InvitesReceived { get; set; }
         public ICollection<Session> Sessions { get; set; }
         public ICollection<RefreshToken> RefreshTokens { get; set; }
         public ICollection<LoginHistory> LoginHistories { get; set; }

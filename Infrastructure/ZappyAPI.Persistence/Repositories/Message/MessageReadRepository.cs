@@ -28,6 +28,7 @@ namespace ZappyAPI.Persistence.Repositories
                 .Select(m => new MessageDto
                 {
                     Id = m.Id,
+                    SenderId = m.SenderId,
                     ContentType = m.ContentType,
                     EncryptedContent = m.EncryptedContent,
                     SenderName = m.Sender.Name,

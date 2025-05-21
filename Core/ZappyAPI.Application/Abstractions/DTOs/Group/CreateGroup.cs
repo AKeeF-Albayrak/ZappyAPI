@@ -13,6 +13,6 @@ namespace ZappyAPI.Application.Abstractions.DTOs.Group
         public byte[] GroupPicture { get; set; }
         public string ContentType { get; set; }
         public string Description { get; set; }
-        public List<Guid> UserIds { get; set; }
+        public List<string> Usernames { get; set; }
     }
 }

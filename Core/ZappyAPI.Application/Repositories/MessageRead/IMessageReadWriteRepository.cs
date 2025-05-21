@@ -9,5 +9,6 @@ namespace ZappyAPI.Application.Repositories
 {
     public interface IMessageReadWriteRepository : IWriteRepository<MessageRead>
     {
+        public Task<bool> ReadMessagesAsync(Guid groupId, Guid userId);
     }
 }

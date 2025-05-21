@@ -11,7 +11,8 @@ namespace ZappyAPI.Application.ViewModels.Message
     {
         public Guid Id { get; set; }
         public DateTime CreatedDate { get; set; }
-        public required Guid SenderId { get; set; }
+        public string SenderName { get; set; }
+        public bool IsUser { get; set; }
         public required MessageContentType ContentType { get; set; }
         public required string EncryptedContent { get; set; }
         public required bool IsPinned { get; set; }

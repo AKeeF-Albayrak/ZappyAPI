@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZappyAPI.Application.Abstractions.DTOs.Friendship;
+using ZappyAPI.Application.ViewModels.Friendship;
 using ZappyAPI.Domain.Enums;
 
 namespace ZappyAPI.Application.Abstractions.Services
@@ -12,5 +13,6 @@ namespace ZappyAPI.Application.Abstractions.Services
     {
         Task<bool> CreateFriendship(CreateFriendship model);
         Task<bool> UpdateFriendship(UpdateFriendship model);
+        Task<GetFriendResponse> GetFriends(FriendshipStatus status);
     }
 }

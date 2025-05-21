@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using ZappyAPI.Application.Abstractions.DTOs.Friendship;
 using ZappyAPI.Application.Abstractions.Services;
 using ZappyAPI.Application.Repositories;
+using ZappyAPI.Application.ViewModels.Friendship;
+using ZappyAPI.Domain.Enums;
 
 namespace ZappyAPI.Persistence.Services
 {
@@ -39,6 +41,45 @@ namespace ZappyAPI.Persistence.Services
             int affected_rows = await _friendshipWriteRepository.SaveAsync();
 
             return affected_rows > 0;
+        }
+
+        public async Task<GetFriendResponse> GetFriends(FriendshipStatus status)
+        {
+            var userId = _userContext.UserId;
+            if(userId == null) return new GetFriendResponse {
+                Succeeded = false,
+            };
+
+            var friendships = await _friendshipReadRepository.GetUsersFriendsAsync((Guid)userId, status);
+            if(friendships == null) return new GetFriendResponse { Succeeded = false };
+
+            List<FriendViewModel> friends = new List<FriendViewModel>();
+
+            foreach(var friendship in friendships)
+            {
+                if(friendship.UserId_1 == userId)
+                {
+                    friends.Add(new FriendViewModel
+                    {
+                        Username = friendship.User_2.Username,
+                        Status = friendship.User_2.UserStatus.Status,
+                    });
+                }
+                else
+                {
+                    friends.Add(new FriendViewModel
+                    {
+                        Username = friendship.User_1.Username,
+                        Status = friendship.User_1.UserStatus.Status,
+                    });
+                }
+            }
+
+            return new GetFriendResponse
+            {
+                Succeeded = true,
+                Friends = friends
+            };
         }
 
         public async Task<bool> UpdateFriendship(UpdateFriendship model)

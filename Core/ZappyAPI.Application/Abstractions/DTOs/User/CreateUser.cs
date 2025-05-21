@@ -14,6 +14,6 @@ namespace ZappyAPI.Application.Abstractions.DTOs.User
         public required string Mail { get; set; }
         public string? ProfilePicturePath { get; set; }
         public string? Description { get; set; }
-        public int? Age { get; set; }
+        public DateOnly BirthDate { get; set; }
     }
 }

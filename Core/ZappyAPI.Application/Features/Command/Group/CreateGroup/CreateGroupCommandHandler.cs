@@ -26,7 +26,7 @@ namespace ZappyAPI.Application.Features.Command.Group.CreateGroup
                     ContentType = request.ContentType,
                     GroupName = request.GroupName,
                     GroupPicture = request.GroupPicture,
-                    UserIds = request.UserIds,
+                    Usernames = request.Usernames,
                 })
             };
         }

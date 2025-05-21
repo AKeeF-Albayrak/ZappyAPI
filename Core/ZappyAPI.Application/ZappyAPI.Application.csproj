@@ -18,8 +18,4 @@
     <ProjectReference Include="..\ZappyAPI.Domain\ZappyAPI.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\Query\User\" />
-  </ItemGroup>
-
 </Project>

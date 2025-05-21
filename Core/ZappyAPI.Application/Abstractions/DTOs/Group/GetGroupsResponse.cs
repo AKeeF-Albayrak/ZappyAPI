@@ -10,6 +10,6 @@ namespace ZappyAPI.Application.Abstractions.DTOs.Group
     public class GetGroupsResponse
     {
         public bool Succeeded { get; set; }
-        public List<GroupViewModel> Groups { get; set; }
+        public List<GroupsViewModel> Groups { get; set; }
     }
 }

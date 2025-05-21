@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZappyAPI.Application.Features.Command.Message.AddMessage;
 using ZappyAPI.Application.Features.Command.Message.DeleteMessage;
+using ZappyAPI.Application.Features.Command.Message.ReadMessages;
 using ZappyAPI.Application.Features.Command.Message.UpdateMessage;
 
 namespace ZappyAPI.API.Controllers
@@ -42,5 +43,13 @@ namespace ZappyAPI.API.Controllers
             return Ok(response);
         }
 
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> ReadMessages([FromBody] ReadMessageCommanRequest request)
+        {
+            ReadMessageCommandResponse response = await _mediator.Send(request);
+            return Ok(response);
+        }
     }
 }

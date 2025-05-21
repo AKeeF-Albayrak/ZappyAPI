@@ -23,5 +23,13 @@ namespace ZappyAPI.Persistence.Repositories
         {
             return await Table.FirstOrDefaultAsync(x => x.Username == username);
         }
+
+        public async Task<List<Guid>> GetUserIdsAsync(List<string> usernames)
+        {
+            return await Table
+                .Where(u => usernames.Contains(u.Username))
+                .Select(u => u.Id)
+                .ToListAsync();
+        }
     }
 }

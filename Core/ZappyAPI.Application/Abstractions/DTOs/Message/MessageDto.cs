@@ -10,6 +10,7 @@ namespace ZappyAPI.Application.Abstractions.DTOs.Message
     public class MessageDto
     {
         public Guid Id { get; set; }
+        public Guid SenderId { get; set; }
         public required MessageContentType ContentType { get; set; }
         public required string EncryptedContent { get; set; }
         public string SenderName { get; set; }

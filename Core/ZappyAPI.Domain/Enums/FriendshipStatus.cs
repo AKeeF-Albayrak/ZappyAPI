@@ -11,6 +11,6 @@ namespace ZappyAPI.Domain.Enums
         Pending,
         Accepted,
         Declined,
-        Bloked
+        Blocked
     }
 }

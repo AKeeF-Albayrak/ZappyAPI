@@ -22,12 +22,15 @@ namespace ZappyAPI.Application.Features.Query.Group.GetGroup
             return new GetGroupQueryResponse
             {
                 Succeeded = response.Succeeded,
-                GroupPicture = response.GroupPicture,
-                Id = response.Id,
-                Messages = response.Messages,
-                Name = response.Name,
-                Users = response.Users,
-            };// TODO: Read Message Here
+                Group = new ViewModels.Group.GroupViewModel
+                {
+                    GroupPicture = response.GroupPicture,
+                    Id = response.Id,
+                    Messages = response.Messages,
+                    Name = response.Name,
+                    Users = response.Users,
+                }
+            };
         }
     }
 }

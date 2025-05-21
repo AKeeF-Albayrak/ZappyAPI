@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using ZappyAPI.Application.Abstractions.DTOs.User;
 using ZappyAPI.Application.Abstractions.Services;
 using ZappyAPI.Application.Repositories;
+using ZappyAPI.Application.ViewModels.User;
 using ZappyAPI.Domain.Entities;
 using ZappyAPI.Infrastructure.Services;
 
@@ -17,12 +19,16 @@ namespace ZappyAPI.Persistence.Services
         readonly IUserReadRepository _userReadRepository;
         readonly IUserStatusWriteRepository _userStatusWriteRepository;
         readonly HashPassword _hashPassword;
-        public UserService(IUserWriteRepository userWriteRepository, IUserStatusWriteRepository userStatusWriteRepository, IUserReadRepository userReadRepository, HashPassword hashPassword)
+        readonly IUserContext _userContext;
+        readonly IStorageService _storageService;
+        public UserService(IUserWriteRepository userWriteRepository, IUserStatusWriteRepository userStatusWriteRepository, IUserReadRepository userReadRepository, HashPassword hashPassword, IUserContext userContext, IStorageService storageService)
         {
             _userWriteRepository = userWriteRepository;
             _userStatusWriteRepository = userStatusWriteRepository;
             _userReadRepository = userReadRepository;
             _hashPassword = hashPassword;
+            _userContext = userContext;
+            _storageService = storageService;
         }
         public async Task<CreateUserResponse> CreateAsync(CreateUser model)
         {
@@ -37,7 +43,7 @@ namespace ZappyAPI.Persistence.Services
                 Mail = model.Mail,
                 ProfilePicPath = model.ProfilePicturePath,
                 Description = model.Description,
-                Age = model.Age,
+                BirthDate = model.BirthDate,
                 CreatedDate = DateTime.UtcNow,
             });
 
@@ -68,6 +74,25 @@ namespace ZappyAPI.Persistence.Services
             };
         }
 
+        public async Task<GetUserResponse> GetUserByIdAsync()
+        {
+            var userId = _userContext.UserId;
+            if (userId == null) return null;
+            var user = await _userReadRepository.GetByIdAsync((Guid)_userContext.UserId);
+
+            return new GetUserResponse
+            {
+                Succeeded = user != null,
+                User = new UserViewModel
+                {
+                    Username = user.Username,
+                    isOnline = true,
+                    ProfilePicture = await _storageService.GetAsync(user.ProfilePicPath),
+
+                }
+            };
+        }
+
         public async Task<LoginUserResponse> LoginUserAsync(string userName, string password)
         {
             var user = await _userReadRepository.GetUserByUsernameAsync(userName);
@@ -86,6 +111,30 @@ namespace ZappyAPI.Persistence.Services
             {
                 Succeeded = false,
             };
+        }
+
+        public async Task<bool> UpdateUserAsync(UpdateUser model)
+        {
+            var userId = _userContext.UserId;
+            if (userId == null)
+            {
+                return false;
+            }
+            var user = await _userReadRepository.GetByIdAsync((Guid)userId);
+
+            if (user != null)
+            {
+                return false;
+            }
+
+            user.Name = model.Name;
+            user.Username = model.Username;
+            user.Mail = model.Mail;
+            user.ProfilePicPath = model.ProfilePicPath;
+            user.Description = model.Description;
+
+            _userWriteRepository.Update(user);
+            return await _userStatusWriteRepository.SaveAsync() > 0;
         }
     }
 }

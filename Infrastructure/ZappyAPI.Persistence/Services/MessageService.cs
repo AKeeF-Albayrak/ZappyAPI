@@ -11,6 +11,7 @@ namespace ZappyAPI.Persistence.Services
         private readonly IMessageReadRepository _messageReadRepository;
         private readonly IUserContext _userContext;
         private readonly IChatHubService _chatHubService;
+        private readonly IMessageReadWriteRepository _messageReadWriteRepository;
 
         public MessageService(
             IMessageWriteRepository messageWriteRepository,
@@ -83,6 +84,15 @@ namespace ZappyAPI.Persistence.Services
                 return true;
             }
             return false ;
+        }
+
+        public async Task<bool> ReadMessages(Guid groupId)
+        {
+            var userId = _userContext.UserId;
+            if (userId == null) return false;
+            await _messageReadWriteRepository.ReadMessagesAsync(groupId, (Guid)userId);
+
+            return await _messageReadWriteRepository.SaveAsync() > 1;
         }
 
         public async Task<bool> UpdateMessage(UpdateMessage model)

@@ -16,5 +16,6 @@ namespace ZappyAPI.Application.Abstractions.DTOs.Group
         public byte[] GroupPicture { get; set; }
         public List<MessageViewModel> Messages { get; set; }
         public List<UserViewModel> Users { get; set; }
+        public List<Guid> ReadByUserIds { get; set; }
     }
 }

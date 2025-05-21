@@ -12,5 +12,6 @@ namespace ZappyAPI.Application.Abstractions.Services
         public Task<bool> CreateMessage(CreateMessage model);
         public Task<bool> DeleteMessage(Guid messageId);
         public Task<bool> UpdateMessage(UpdateMessage model);
+        public Task<bool> ReadMessages(Guid groupId);
     }
 }

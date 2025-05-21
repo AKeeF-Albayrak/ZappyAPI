@@ -16,6 +16,6 @@ namespace ZappyAPI.Application.Features.Command.User.CreateUser
         public string? ProfilePicture { get; set; }
         public string? ContentType { get; set; }
         public string? Description { get; set; }
-        public int? Age { get; set; }
+        public DateOnly BirthDate { get; set; }
     }
 }
