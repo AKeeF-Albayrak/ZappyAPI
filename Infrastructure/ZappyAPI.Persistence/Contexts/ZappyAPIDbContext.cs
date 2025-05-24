@@ -25,6 +25,7 @@ namespace ZappyAPI.Persistence.Contexts
         public DbSet<Session> Sessions { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserStatus> UserStatuses { get; set; }
+        public DbSet<StarredMessage> StarredMessages { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -137,6 +138,18 @@ namespace ZappyAPI.Persistence.Contexts
                 .HasOne(us => us.User)
                 .WithOne(u => u.UserStatus)
                 .HasForeignKey<UserStatus>(us => us.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StarredMessage>()
+                .HasOne(sm => sm.Message)
+                .WithMany(m => m.StarredMessages)
+                .HasForeignKey(sm => sm.MessageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StarredMessage>()
+                .HasOne(sm => sm.User)
+                .WithMany(u => u.starredMessages)
+                .HasForeignKey(sm => sm.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

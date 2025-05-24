@@ -28,6 +28,7 @@ namespace ZappyAPI.Domain.Entities
         public ICollection<Report> ReportsMade { get; set; }
         public ICollection<Report> ReportsReceived { get; set; }
         public UserStatus UserStatus { get; set; }
+        public ICollection<StarredMessage> starredMessages { get; set; }
     }
 
 }

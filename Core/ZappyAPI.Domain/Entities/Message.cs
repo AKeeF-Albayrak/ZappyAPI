@@ -22,6 +22,7 @@ namespace ZappyAPI.Domain.Entities
         public User Sender { get; set; }
         public Message? RepliedMessage { get; set; }
         public ICollection<MessageRead> MessageReads { get; set; }
+        public List<StarredMessage> StarredMessages { get; set; }
     }
 
 }

@@ -13,6 +13,7 @@ namespace ZappyAPI.Application.ViewModels.Message
         public DateTime CreatedDate { get; set; }
         public string SenderName { get; set; }
         public bool IsUser { get; set; }
+        public bool IsStarreed { get; set; }
         public required MessageContentType ContentType { get; set; }
         public required string EncryptedContent { get; set; }
         public required bool IsPinned { get; set; }

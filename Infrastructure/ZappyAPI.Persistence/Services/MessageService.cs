@@ -1,7 +1,9 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using System.Runtime.CompilerServices;
 using ZappyAPI.Application.Abstractions.DTOs.Message;
 using ZappyAPI.Application.Abstractions.Services;
 using ZappyAPI.Application.Repositories;
+using ZappyAPI.Application.ViewModels.StarMessage;
 
 namespace ZappyAPI.Persistence.Services
 {
@@ -12,17 +14,23 @@ namespace ZappyAPI.Persistence.Services
         private readonly IUserContext _userContext;
         private readonly IChatHubService _chatHubService;
         private readonly IMessageReadWriteRepository _messageReadWriteRepository;
+        private readonly IStarredMessageWriteRepository _starredMessageWriteRepository;
+        private readonly IStarredMessageReadRepository _starredMessageReadRepository;
 
         public MessageService(
             IMessageWriteRepository messageWriteRepository,
             IMessageReadRepository messageReadRepository,
             IUserContext userContext,
-            IChatHubService chatHubService)
+            IChatHubService chatHubService,
+            IStarredMessageWriteRepository starredMessageWriteRepository,
+            IStarredMessageReadRepository starredMessageReadRepository)
         {
             _messageReadRepository = messageReadRepository;
             _messageWriteRepository = messageWriteRepository;
             _userContext = userContext;
             _chatHubService = chatHubService;
+            _starredMessageReadRepository = starredMessageReadRepository;
+            _starredMessageWriteRepository = starredMessageWriteRepository;
         }
 
         public async Task<bool> CreateMessage(CreateMessage model)
@@ -86,6 +94,22 @@ namespace ZappyAPI.Persistence.Services
             return false ;
         }
 
+        public async Task<StarMessageResponse> GetStarredMessages()
+        {
+            var userId = _userContext.UserId;
+            if (userId == null) return new StarMessageResponse
+            {
+                Succeeded = false,
+            };
+
+            var starredMessages = await _starredMessageReadRepository.GetUsersStarredMessagesAsync((Guid)userId);
+            return new StarMessageResponse
+            {
+                StarredMessageViewModel = starredMessages,
+                Succeeded = true
+            };
+        }
+
         public async Task<bool> ReadMessages(Guid groupId)
         {
             var userId = _userContext.UserId;
@@ -93,6 +117,30 @@ namespace ZappyAPI.Persistence.Services
             await _messageReadWriteRepository.ReadMessagesAsync(groupId, (Guid)userId);
 
             return await _messageReadWriteRepository.SaveAsync() > 1;
+        }
+
+        public async Task<bool> StarMessage(StarMessageRequest model)
+        {
+            var userId = _userContext.UserId;
+
+            if (userId != null)
+            {
+                return false;
+            }
+
+            await _starredMessageWriteRepository.AddAsync(new Domain.Entities.StarredMessage
+            {
+                Id = Guid.NewGuid(),
+                CreatedDate = DateTime.UtcNow,
+                MessageId = model.MessageId,
+                UserId = (Guid)userId,
+            });
+            return await _starredMessageWriteRepository.SaveAsync() > 0;
+        }
+
+        public Task<bool> StarMessage(StarMessageResponse model)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<bool> UpdateMessage(UpdateMessage model)

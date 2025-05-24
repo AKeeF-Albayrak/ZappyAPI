@@ -28,7 +28,8 @@ namespace ZappyAPI.Persistence.Services
         private readonly IUserStatusReadRepository _userStatusReadRepository;
         private readonly IChatHubService _chatHubService;
         private readonly IMessageReadReadRepository _messageReadReadRepository;
-        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext,  IUserStatusReadRepository userStatusReadRepository, IChatHubService chatHubService, IMessageReadReadRepository messageReadReadRepository)
+        private readonly IStarredMessageReadRepository _starredMessageReadRepository;
+        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext,  IUserStatusReadRepository userStatusReadRepository, IChatHubService chatHubService, IMessageReadReadRepository messageReadReadRepository, IStarredMessageReadRepository starredMessageReadRepository)
         {
             _participantReadRepository = participantReadRepository;
             _messageReadRepository = messageReadRepository;
@@ -39,6 +40,7 @@ namespace ZappyAPI.Persistence.Services
             _userReadRepository = userReadRepository;
             _chatHubService = chatHubService;
             _messageReadReadRepository = messageReadReadRepository;
+            _starredMessageReadRepository = starredMessageReadRepository;
         }
 
         public async Task<bool> CreateGroup(CreateGroup createGroup)
@@ -140,6 +142,7 @@ namespace ZappyAPI.Persistence.Services
                     CreatedDate = message.CreatedDate,
                     EncryptedContent = message.EncryptedContent,
                     IsPinned = message.IsPinned,
+                    IsStarreed = message.StarredMessages.Any(sm => sm.UserId == userId),
                     RepliedMessageId = message.RepliedMessageId,
                     SenderName = message.Sender.Username,
                     IsUser = message.SenderId == userId,

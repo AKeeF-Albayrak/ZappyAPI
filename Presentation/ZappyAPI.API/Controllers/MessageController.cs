@@ -6,6 +6,8 @@ using ZappyAPI.Application.Features.Command.Message.AddMessage;
 using ZappyAPI.Application.Features.Command.Message.DeleteMessage;
 using ZappyAPI.Application.Features.Command.Message.ReadMessages;
 using ZappyAPI.Application.Features.Command.Message.UpdateMessage;
+using ZappyAPI.Application.Features.Command.StarMessage.AddStarMessage;
+using ZappyAPI.Application.Features.Query.StarMessage.GetStarredMessages;
 
 namespace ZappyAPI.API.Controllers
 {
@@ -49,6 +51,22 @@ namespace ZappyAPI.API.Controllers
         public async Task<IActionResult> ReadMessages([FromBody] ReadMessageCommanRequest request)
         {
             ReadMessageCommandResponse response = await _mediator.Send(request);
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> StarMessage([FromBody] AddStarMessageCommandRequest request)
+        {
+            AddStarMessageCommandResponse response = await _mediator.Send(request);
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetStarredMessages([FromQuery] GetStarredMessagesQueryRequest request)
+        {
+            GetStarredMessagesQueryReponse response = await _mediator.Send(request);
             return Ok(response);
         }
     }

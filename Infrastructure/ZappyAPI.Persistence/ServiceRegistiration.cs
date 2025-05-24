@@ -64,6 +64,9 @@ namespace ZappyAPI.Persistence
             services.AddScoped<ISessionReadRepository, SessionReadRepository>();
             services.AddScoped<ISessionWriteRepository, SessionWriteRepository>();
 
+            services.AddScoped<IStarredMessageReadRepository, StarredMessageReadRepository>();
+            services.AddScoped<IStarredMessageWriteRepository, StarredMessageWriteRepository>();
+
             services.AddScoped<IUserReadRepository, UserReadRepository>();
             services.AddScoped<IUserWriteRepository, UserWriteRepository>();
 
