@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZappyAPI.Application.ViewModels.GroupReadStatus;
 using ZappyAPI.Application.ViewModels.Message;
 using ZappyAPI.Application.ViewModels.User;
 
@@ -17,5 +18,6 @@ namespace ZappyAPI.Application.Abstractions.DTOs.Group
         public List<MessageViewModel> Messages { get; set; }
         public List<UserViewModel> Users { get; set; }
         public List<Guid> ReadByUserIds { get; set; }
+        public List<GroupReadStatusViewModel> GroupReadStatuses { get; set; }
     }
 }

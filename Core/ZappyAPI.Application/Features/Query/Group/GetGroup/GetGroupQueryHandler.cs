@@ -29,6 +29,7 @@ namespace ZappyAPI.Application.Features.Query.Group.GetGroup
                     Messages = response.Messages,
                     Name = response.Name,
                     Users = response.Users,
+                    GroupReadStatuses = response.GroupReadStatuses,
                 }
             };
         }

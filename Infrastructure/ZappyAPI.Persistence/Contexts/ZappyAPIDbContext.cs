@@ -17,7 +17,7 @@ namespace ZappyAPI.Persistence.Contexts
         public DbSet<Group> Groups { get; set; }
         public DbSet<LoginHistory> LoginHistories { get; set; }
         public DbSet<Message> Messages { get; set; }
-        public DbSet<MessageRead> MessageReads { get; set; }
+        public DbSet<GroupReadStatus> GroupReadStatuses { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Participant> Participants { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -73,18 +73,6 @@ namespace ZappyAPI.Persistence.Contexts
                 .WithMany()
                 .HasForeignKey(m => m.RepliedMessageId)
                 .OnDelete(DeleteBehavior.SetNull);
-
-            modelBuilder.Entity<MessageRead>()
-                .HasOne(mr => mr.Message)
-                .WithMany(m => m.MessageReads)
-                .HasForeignKey(mr => mr.MessageId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<MessageRead>()
-                .HasOne(mr => mr.User)
-                .WithMany()
-                .HasForeignKey(mr => mr.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.User)
@@ -150,6 +138,18 @@ namespace ZappyAPI.Persistence.Contexts
                 .HasOne(sm => sm.User)
                 .WithMany(u => u.starredMessages)
                 .HasForeignKey(sm => sm.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<GroupReadStatus>()
+                .HasOne(grs => grs.User)
+                .WithMany(u => u.groupReadStatuses)
+                .HasForeignKey(grs => grs.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<GroupReadStatus>()
+                .HasOne(grs => grs.Group)
+                .WithMany(g => g.GroupReadStatuses)
+                .HasForeignKey(grs => grs.GroupId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

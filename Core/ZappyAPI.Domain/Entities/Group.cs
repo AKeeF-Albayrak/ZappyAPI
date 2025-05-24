@@ -16,5 +16,6 @@ namespace ZappyAPI.Domain.Entities
 
         public ICollection<Participant> Participants { get; set; }
         public ICollection<Message> Messages { get; set; }
+        public ICollection<GroupReadStatus> GroupReadStatuses { get; set; }
     }
 }

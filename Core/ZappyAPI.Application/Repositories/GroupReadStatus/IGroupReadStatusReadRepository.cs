@@ -7,8 +7,8 @@ using ZappyAPI.Domain.Entities;
 
 namespace ZappyAPI.Application.Repositories
 {
-    public interface IMessageReadReadRepository : IReadRepository<MessageRead>
+    public interface IGroupReadStatusReadRepository : IReadRepository<GroupReadStatus>
     {
-        public Task<List<MessageRead>> GetReadMessagesAsync(Guid groupId);
+        public Task<List<GroupReadStatus>> GetReadMessagesAsync(Guid groupId);
     }
 }

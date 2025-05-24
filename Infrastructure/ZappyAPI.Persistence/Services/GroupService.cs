@@ -8,6 +8,7 @@ using ZappyAPI.Application.Abstractions.DTOs.Group;
 using ZappyAPI.Application.Abstractions.Services;
 using ZappyAPI.Application.Repositories;
 using ZappyAPI.Application.ViewModels.Group;
+using ZappyAPI.Application.ViewModels.GroupReadStatus;
 using ZappyAPI.Application.ViewModels.Message;
 using ZappyAPI.Application.ViewModels.User;
 using ZappyAPI.Domain.Entities;
@@ -27,9 +28,9 @@ namespace ZappyAPI.Persistence.Services
         private readonly IUserContext _userContext;
         private readonly IUserStatusReadRepository _userStatusReadRepository;
         private readonly IChatHubService _chatHubService;
-        private readonly IMessageReadReadRepository _messageReadReadRepository;
+        private readonly IGroupReadStatusReadRepository _messageReadReadRepository;
         private readonly IStarredMessageReadRepository _starredMessageReadRepository;
-        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext,  IUserStatusReadRepository userStatusReadRepository, IChatHubService chatHubService, IMessageReadReadRepository messageReadReadRepository, IStarredMessageReadRepository starredMessageReadRepository)
+        public GroupService(IParticipantReadRepository participantReadRepository,IMessageReadRepository messageReadRepository, IStorageService storageService, IGroupWriteRepository groupWriteRepository, IGroupReadRepository groupReadRepository, IUserReadRepository userReadRepository, IUserContext userContext,  IUserStatusReadRepository userStatusReadRepository, IChatHubService chatHubService, IGroupReadStatusReadRepository messageReadReadRepository, IStarredMessageReadRepository starredMessageReadRepository)
         {
             _participantReadRepository = participantReadRepository;
             _messageReadRepository = messageReadRepository;
@@ -132,6 +133,7 @@ namespace ZappyAPI.Persistence.Services
 
             List<UserViewModel> users = new List<UserViewModel>();
             List<MessageViewModel> messages = new List<MessageViewModel>();
+            List<GroupReadStatusViewModel> readStatuses = new List<GroupReadStatusViewModel>();
 
             foreach (var message in group.Messages)
             {
@@ -158,9 +160,16 @@ namespace ZappyAPI.Persistence.Services
                     Username = user.Username,
                     ProfilePicture = await _storageService.GetAsync(user.ProfilePicPath)
                 });
-            }
 
-            // TODO: Change IsOnline With SignalR Hub
+                var readStatus = user.groupReadStatuses
+                    .FirstOrDefault(grs => grs.GroupId == groupId);
+
+                readStatuses.Add(new GroupReadStatusViewModel
+                {
+                    Username = user.Username,
+                    LastReadAt = readStatus?.LastReadAt ?? DateTime.MinValue
+                });
+            }
 
             return new GetGroupResponse
             {

@@ -7,7 +7,7 @@ using ZappyAPI.Domain.Entities;
 
 namespace ZappyAPI.Application.Repositories
 {
-    public interface IMessageReadWriteRepository : IWriteRepository<MessageRead>
+    public interface IGroupReadStatusWriteRepository : IWriteRepository<GroupReadStatus>
     {
         public Task<bool> ReadMessagesAsync(Guid groupId, Guid userId);
     }

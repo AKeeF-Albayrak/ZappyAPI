@@ -13,7 +13,7 @@ namespace ZappyAPI.Persistence.Services
         private readonly IMessageReadRepository _messageReadRepository;
         private readonly IUserContext _userContext;
         private readonly IChatHubService _chatHubService;
-        private readonly IMessageReadWriteRepository _messageReadWriteRepository;
+        private readonly IGroupReadStatusWriteRepository _groupReadStatusWriteRepository;
         private readonly IStarredMessageWriteRepository _starredMessageWriteRepository;
         private readonly IStarredMessageReadRepository _starredMessageReadRepository;
 
@@ -23,7 +23,8 @@ namespace ZappyAPI.Persistence.Services
             IUserContext userContext,
             IChatHubService chatHubService,
             IStarredMessageWriteRepository starredMessageWriteRepository,
-            IStarredMessageReadRepository starredMessageReadRepository)
+            IStarredMessageReadRepository starredMessageReadRepository,
+            IGroupReadStatusWriteRepository groupReadStatusWriteRepository)
         {
             _messageReadRepository = messageReadRepository;
             _messageWriteRepository = messageWriteRepository;
@@ -31,6 +32,7 @@ namespace ZappyAPI.Persistence.Services
             _chatHubService = chatHubService;
             _starredMessageReadRepository = starredMessageReadRepository;
             _starredMessageWriteRepository = starredMessageWriteRepository;
+            _groupReadStatusWriteRepository = groupReadStatusWriteRepository;
         }
 
         public async Task<bool> CreateMessage(CreateMessage model)
@@ -114,9 +116,9 @@ namespace ZappyAPI.Persistence.Services
         {
             var userId = _userContext.UserId;
             if (userId == null) return false;
-            await _messageReadWriteRepository.ReadMessagesAsync(groupId, (Guid)userId);
+            await _groupReadStatusWriteRepository.ReadMessagesAsync(groupId, (Guid)userId);
 
-            return await _messageReadWriteRepository.SaveAsync() > 1;
+            return await _groupReadStatusWriteRepository.SaveAsync() > 1;
         }
 
         public async Task<bool> StarMessage(StarMessageRequest model)
@@ -136,12 +138,7 @@ namespace ZappyAPI.Persistence.Services
                 UserId = (Guid)userId,
             });
             return await _starredMessageWriteRepository.SaveAsync() > 0;
-        }
-
-        public Task<bool> StarMessage(StarMessageResponse model)
-        {
-            throw new NotImplementedException();
-        }
+        } 
 
         public async Task<bool> UpdateMessage(UpdateMessage model)
         {

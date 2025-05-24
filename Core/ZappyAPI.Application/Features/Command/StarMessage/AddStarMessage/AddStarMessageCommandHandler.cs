@@ -19,7 +19,7 @@ namespace ZappyAPI.Application.Features.Command.StarMessage.AddStarMessage
         {
             return new AddStarMessageCommandResponse
             {
-                Succeeded = await _messageService.StarMessage(new Abstractions.DTOs.Message.StarMessageResponse
+                Succeeded = await _messageService.StarMessage(new Abstractions.DTOs.Message.StarMessageRequest
                 {
                     MessageId = request.MessageId,
                 })

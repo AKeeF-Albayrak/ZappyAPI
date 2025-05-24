@@ -10,19 +10,19 @@ using ZappyAPI.Persistence.Contexts;
 
 namespace ZappyAPI.Persistence.Repositories
 {
-    public class MessageReadReadRepository : ReadRepository<MessageRead>, IMessageReadReadRepository
+    public class GroupReadStatusReadRepository : ReadRepository<GroupReadStatus>, IGroupReadStatusReadRepository
     {
         private readonly ZappyAPIDbContext _context;
-        public MessageReadReadRepository(ZappyAPIDbContext context) : base(context)
+        public GroupReadStatusReadRepository(ZappyAPIDbContext context) : base(context)
         {
             _context = context;
         }
-        public DbSet<MessageRead> Table => _context.Set<MessageRead>();
+        public DbSet<GroupReadStatus> Table => _context.Set<GroupReadStatus>();
 
-        public Task<List<MessageRead>> GetReadMessagesAsync(Guid groupId)
+        public Task<List<GroupReadStatus>> GetReadMessagesAsync(Guid groupId)
         {
             return Table
-                .Where(mr => mr.Message.GroupId == groupId)
+                .Where(grs => grs.GroupId == groupId)
                 .ToListAsync();
         }
     }

@@ -7,13 +7,13 @@ using ZappyAPI.Domain.Entities.Common;
 
 namespace ZappyAPI.Domain.Entities
 {
-    public class MessageRead : BaseEntity
+    public class GroupReadStatus : BaseEntity
     {
-        public required Guid UserId { get; set; }
-        public required Guid MessageId { get; set; }
-
+        public Guid UserId { get; set; }
+        public Guid GroupId { get; set; }
+        public DateTime LastReadAt { get; set; }
 
         public User User { get; set; }
-        public Message Message { get; set; }
+        public Group Group { get; set; }
     }
 }
