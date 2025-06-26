@@ -23,15 +23,6 @@ namespace ZappyAPI.Persistence.Services
 
         public async Task<CreateTokenResponse> CreateAsync(CreateRefreshToken model)
         {
-            var userId = _userContext.UserId;
-            if (userId == null || userId != model.UserId)
-            {
-                return new CreateTokenResponse
-                {
-                    Succeeded = false,
-                };
-            }
-
             var randomBytes = RandomNumberGenerator.GetBytes(64);
             var token = Convert.ToBase64String(randomBytes);
             var id = Guid.NewGuid();
@@ -42,7 +33,7 @@ namespace ZappyAPI.Persistence.Services
                 Token = token,
                 CreatedDate = DateTime.UtcNow,
                 ExpireDate = DateTime.UtcNow.AddDays(7),
-                UserId = userId.Value,
+                UserId = model.UserId,
                 Revoked = false
             });
 

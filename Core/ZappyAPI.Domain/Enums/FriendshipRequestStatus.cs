@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace ZappyAPI.Domain.Enums
 {
-    public enum FriendshipStatus
+    public enum FriendshipRequestStatus
     {
-        Accepted,
-        Blocked
+        Pending = 0,
+        Accepted = 1,
+        Rejected = 2
     }
 }

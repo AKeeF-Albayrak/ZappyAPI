@@ -86,7 +86,7 @@ namespace ZappyAPI.Persistence.Services
                 User = new UserViewModel
                 {
                     Username = user.Username,
-                    isOnline = true,
+                    Status = user.UserStatus.Status,
                     ProfilePicture = await _storageService.GetAsync(user.ProfilePicPath),
 
                 }

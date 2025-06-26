@@ -21,8 +21,7 @@ namespace ZappyAPI.Application.Features.Command.Friendship.CreateFriendship
             {
                 Succeeded = await _friendshipService.CreateFriendship(new Abstractions.DTOs.Friendship.CreateFriendship
                 {
-                    UserId_1 = request.UserId_1,
-                    UserId_2 = request.UserId_2,
+                    Username = request.Username,
                 })
             };
         }

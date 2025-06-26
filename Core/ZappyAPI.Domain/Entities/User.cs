@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,8 +19,13 @@ namespace ZappyAPI.Domain.Entities
         public DateOnly BirthDate { get; set; }
 
         public ICollection<Message> Messages { get; set; }
-        public ICollection<Friendship> Friendships_1 { get; set; }
-        public ICollection<Friendship> Friendships_2 { get; set; }
+        public ICollection<Friendship> FriendshipsA { get; set; } = new List<Friendship>();
+        public ICollection<Friendship> FriendshipsB { get; set; } = new List<Friendship>();
+
+        public IEnumerable<User> Friends =>
+            FriendshipsA.Select(f => f.UserB).Concat(FriendshipsB.Select(f => f.UserA));
+        public ICollection<FriendshipRequest> FriendshipRequestsSent { get; set; } = new List<FriendshipRequest>();
+        public ICollection<FriendshipRequest> FriendshipRequestsReceived { get; set; } = new List<FriendshipRequest>();
         public ICollection<Session> Sessions { get; set; }
         public ICollection<RefreshToken> RefreshTokens { get; set; }
         public ICollection<LoginHistory> LoginHistories { get; set; }
@@ -31,5 +37,4 @@ namespace ZappyAPI.Domain.Entities
         public ICollection<StarredMessage> starredMessages { get; set; }
         public ICollection<GroupReadStatus> groupReadStatuses { get; set; }
     }
-
 }

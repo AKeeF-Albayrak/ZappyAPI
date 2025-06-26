@@ -73,6 +73,9 @@ namespace ZappyAPI.Persistence
             services.AddScoped<IUserStatusReadRepository, UserStatusReadRepository>();
             services.AddScoped<IUserStatusWriteRepository, UserStatusWriteRepository>();
 
+            services.AddScoped<IFriendshipRequestReadRepository, FriendshipRequestReadRepository>();
+            services.AddScoped<IFriendshipRequestWriteRepository, FriendshipRequestWriteRepository>();
+
             //Services
 
             services.AddScoped<IUserService, UserService>();

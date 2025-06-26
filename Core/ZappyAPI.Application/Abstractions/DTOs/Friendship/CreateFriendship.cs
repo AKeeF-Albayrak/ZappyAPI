@@ -8,7 +8,6 @@ namespace ZappyAPI.Application.Abstractions.DTOs.Friendship
 {
     public class CreateFriendship
     {
-        public required Guid UserId_1 { get; set; }
-        public required Guid UserId_2 { get; set; }
+        public required string Username { get; set; }
     }
 }

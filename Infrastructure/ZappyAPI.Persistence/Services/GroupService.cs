@@ -156,7 +156,7 @@ namespace ZappyAPI.Persistence.Services
                 var user = await _userReadRepository.GetByIdAsync(participant.UserId);
                 users.Add(new UserViewModel
                 {
-                    isOnline = false,
+                    Status = user.UserStatus.Status,
                     Username = user.Username,
                     ProfilePicture = await _storageService.GetAsync(user.ProfilePicPath)
                 });

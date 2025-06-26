@@ -22,17 +22,6 @@ namespace ZappyAPI.Persistence.Services
 
         public async Task<CreateSessionResponse> CreateAsync(CreateSession model)
         {
-            var userId = _userContext.UserId;
-
-            if (userId == null || userId != model.UserId)
-            {
-                return new CreateSessionResponse
-                {
-                    Succeeded = false,
-                    Id = Guid.Empty
-                };
-            }
-
             Guid id = Guid.NewGuid();
 
             await _sessionWriteRepository.AddAsync(new Domain.Entities.Session
@@ -44,7 +33,7 @@ namespace ZappyAPI.Persistence.Services
                 IsActive = true,
                 LastActivityDate = DateTime.UtcNow,
                 RefreshTokenId = model.RefreshTokenId,
-                UserId = userId.Value
+                UserId = model.UserId
             });
 
             int affected_rows = await _sessionWriteRepository.SaveAsync();

@@ -26,6 +26,7 @@ namespace ZappyAPI.Persistence.Contexts
         public DbSet<User> Users { get; set; }
         public DbSet<UserStatus> UserStatuses { get; set; }
         public DbSet<StarredMessage> StarredMessages { get; set; }
+        public DbSet<FriendshipRequest> friendshipRequests { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,16 +40,28 @@ namespace ZappyAPI.Persistence.Contexts
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Friendship>()
-                .HasOne(f => f.User_1)
-                .WithMany(u => u.Friendships_1)
-                .HasForeignKey(f => f.UserId_1)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(f => f.UserA)
+                .WithMany(u => u.FriendshipsA)
+                .HasForeignKey(f => f.UserAId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Friendship>()
-                .HasOne(f => f.User_2)
-                .WithMany(u => u.Friendships_2)
-                .HasForeignKey(f => f.UserId_2)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(f => f.UserB)
+                .WithMany(u => u.FriendshipsB)
+                .HasForeignKey(f => f.UserBId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FriendshipRequest>()
+                .HasOne(fr => fr.Sender)
+                .WithMany(u => u.FriendshipRequestsSent)
+                .HasForeignKey(fr => fr.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FriendshipRequest>()
+                .HasOne(fr => fr.Receiver)
+                .WithMany(u => u.FriendshipRequestsReceived)
+                .HasForeignKey(fr => fr.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<LoginHistory>()
                 .HasOne(l => l.User)

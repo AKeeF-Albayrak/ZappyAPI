@@ -9,9 +9,7 @@ namespace ZappyAPI.Application.Features.Command.Friendship.CreateFriendship
 {
     public class CreateFriendshipCommandRequest : IRequest<CreateFriendshipCommandResponse> 
     {
-        // TODO: Change to userid, username
-        public Guid UserId_1 { get; set; }
-        public Guid UserId_2 { get; set; }
+        public string Username { get; set; }
 
     }
 }

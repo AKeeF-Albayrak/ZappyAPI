@@ -16,16 +16,22 @@ namespace ZappyAPI.Persistence.Services
         private readonly IFriendshipWriteRepository _friendshipWriteRepository;
         private readonly IFriendshipReadRepository _friendshipReadRepository;
         private readonly IUserContext _userContext;
-        public FriendshipService(IFriendshipWriteRepository friendshipWriteRepository, IFriendshipReadRepository friendshipReadRepository, IUserContext userContext)
+        private readonly IUserReadRepository _userReadRepository;
+        public FriendshipService(IFriendshipWriteRepository friendshipWriteRepository, IFriendshipReadRepository friendshipReadRepository, IUserContext userContext, IUserReadRepository userReadRepository)
         {
             _friendshipWriteRepository = friendshipWriteRepository;
             _friendshipReadRepository = friendshipReadRepository;
             _userContext = userContext;
+            _userReadRepository = userReadRepository;
         }
 
         public async Task<bool> CreateFriendship(CreateFriendship model)
         {
-            if (_userContext.UserId == null || !(_userContext.UserId == model.UserId_1 || _userContext.UserId == model.UserId_2))
+            var userId = _userContext.UserId;
+
+            var user2Id = (await _userReadRepository.GetUserByUsernameAsync(model.Username)).Id;
+            
+            if (userId == null || user2Id == null)
             {
                 return false;
             }
@@ -33,9 +39,9 @@ namespace ZappyAPI.Persistence.Services
             {
                 Id = Guid.NewGuid(),
                 CreatedDate = DateTime.UtcNow,
-                Status = Domain.Enums.FriendshipStatus.Pending,
-                UserId_1 = model.UserId_1,
-                UserId_2 = model.UserId_2,
+                Status = Domain.Enums.FriendshipStatus.Accepted,
+                UserAId = (Guid)userId,
+                UserBId = user2Id,
             });
 
             int affected_rows = await _friendshipWriteRepository.SaveAsync();
@@ -57,20 +63,20 @@ namespace ZappyAPI.Persistence.Services
 
             foreach(var friendship in friendships)
             {
-                if(friendship.UserId_1 == userId)
+                if(friendship.UserAId == userId)
                 {
                     friends.Add(new FriendViewModel
                     {
-                        Username = friendship.User_2.Username,
-                        Status = friendship.User_2.UserStatus.Status,
+                        Username = friendship.UserB.Username,
+                        Status = friendship.UserB.UserStatus.Status,
                     });
                 }
                 else
                 {
                     friends.Add(new FriendViewModel
                     {
-                        Username = friendship.User_1.Username,
-                        Status = friendship.User_1.UserStatus.Status,
+                        Username = friendship.UserA.Username,
+                        Status = friendship.UserA.UserStatus.Status,
                     });
                 }
             }
@@ -91,7 +97,7 @@ namespace ZappyAPI.Persistence.Services
                 return false;
             }
 
-            if (_userContext.UserId == null || !(_userContext.UserId == friendship.UserId_1 || _userContext.UserId == friendship.UserId_2))
+            if (_userContext.UserId == null || !(_userContext.UserId == friendship.UserAId || _userContext.UserId == friendship.UserBId))
             {
                 return false;
             }
@@ -103,5 +109,6 @@ namespace ZappyAPI.Persistence.Services
             int affected_rows = await _friendshipWriteRepository.SaveAsync();
             return affected_rows > 0;
         }
+
     }
 }

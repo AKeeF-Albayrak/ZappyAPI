@@ -89,5 +89,3 @@ app.MapHub<ChatHub>("/hub/chat");
 app.Run();
 
 // TODO: Maybe Later Add QR Code GroupInvite, Friendship
-// TODO: Stared Messages Relation with message and user
-// TODO: Add ReadMessage

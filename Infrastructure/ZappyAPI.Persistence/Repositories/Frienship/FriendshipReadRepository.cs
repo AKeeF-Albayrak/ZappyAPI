@@ -23,7 +23,7 @@ namespace ZappyAPI.Persistence.Repositories
         public Task<List<Friendship>> GetUsersFriendsAsync(Guid userId, FriendshipStatus status)
         {
             return Table
-                .Where(f => (f.UserId_1 == userId || f.UserId_2 == userId) && f.Status == status)
+                .Where(f => (f.UserAId == userId || f.UserBId == userId) && f.Status == status)
                 .ToListAsync();
         }
     }

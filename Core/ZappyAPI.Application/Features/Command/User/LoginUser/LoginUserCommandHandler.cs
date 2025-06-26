@@ -40,6 +40,7 @@ namespace ZappyAPI.Application.Features.Command.User.LoginUser
                     Message = "Wrong Password or Username"
                 };
             }
+
             var loginHistoryResult = await _loginHistoryService.CreateAsync(new Abstractions.DTOs.LoginHistory.CreateLoginHistory
             {
                 Succeeded = true,
@@ -89,20 +90,22 @@ namespace ZappyAPI.Application.Features.Command.User.LoginUser
             {
                 new Claim(ClaimTypes.NameIdentifier, response.UserId.ToString()),
                 new Claim(ClaimTypes.Name, request.UserName),
-                new Claim(ClaimTypes.Role, "User")
+                new Claim(ClaimTypes.Role, "User"),
+                new Claim("userId", response.UserId.ToString()),
+                new Claim("username", request.UserName)
             };
 
 
             var accessToken = _tokenService.GenerateAccessToken(claims);
-
+            string result = loginHistoryResult.Succeeded.ToString() + refreshTokenResult.Succeeded.ToString() + sessionResult.Succeeded.ToString();
             return new LoginUserCommandRepsonse
             {
                 Succeeded = loginHistoryResult.Succeeded && refreshTokenResult.Succeeded && sessionResult.Succeeded,
                 Message = loginHistoryResult.Succeeded && refreshTokenResult.Succeeded && sessionResult.Succeeded
                     ? "Succeeded"
-                    : "Something Went Wrong!",
-                AccessToken = accessToken,
-                RefreshToken = refreshTokenResult.Token
+                    : "Something Went Wrong! " + result,
+                RefreshToken = accessToken,
+                AccessToken = refreshTokenResult.Token
             };
         }
     }
